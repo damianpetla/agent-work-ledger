@@ -8,11 +8,11 @@ The first user is an individual running a small agent workflow locally. The prod
 
 ## Current boundary and first evaluation
 
-The repository currently contains planning material, not working software. Implementation, live reporting and deployment have not started.
+The repository includes a local file timeline and source inspector with synthetic examples. Independent source review, integrated QA and user evaluation are separate gates; author checks alone do not establish acceptance. Live reporting, graphs and deployment remain unimplemented.
 
 First trial: load the supplied local example and identify the delegation, reported block and unknown runtime model from its timeline.
 
-The example will be explicitly synthetic and load through the ordinary documented input path. The evaluator can inspect source records and repeat the import, including invalid and duplicate inputs. This evaluates local interpretation and usability; it does not demonstrate a live agent connection. No external account, AI call or private conversation history should be needed.
+The example is explicitly synthetic and loads through the ordinary documented input path. The evaluator can inspect source records and repeat the import, including invalid and duplicate inputs. This evaluates local interpretation and usability; it does not demonstrate a live agent connection. No external account, AI call or private conversation history should be needed.
 
 ## Terminology
 

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <title>Agent Work Ledger · Local timeline</title>
+</head>
+<body>
+  <a class="skip-link" href="#timeline-heading">Skip to timeline</a>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">≋</span> Agent Work Ledger</div>
+    <span class="session-tag"><span aria-hidden="true">●</span> Local file workspace</span>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-heading">
+      <div><p class="eyebrow">TRACE THE REPORTS</p><h1 id="page-heading">A clearer view of agent work.</h1><p class="lede">Follow a task's timeline. Inspect the record behind every report.</p></div>
+      <div class="memory-note"><strong>In memory, for this tab.</strong><p>Reloading or closing clears this workspace. Import your files again to reconstruct it.</p></div>
+    </section>
+    <section class="import-panel" aria-labelledby="import-heading">
+      <div><h2 id="import-heading">Import event records</h2><p>UTF-8 JSON · v1 · up to 1 MiB and 1,000 events per file</p></div>
+      <div class="file-control"><label for="event-file">Choose a local event file</label><input id="event-file" type="file" accept=".json,application/json" aria-describedby="file-help"></div>
+      <p id="file-help">Trying it out? <a href="examples/synthetic-timeline.json" download>Download the synthetic example</a>, then choose it here.</p>
+    </section>
+    <p id="import-status" class="status" role="status" aria-live="polite">No events imported. Your files stay in this browser.</p>
+    <div id="import-error" class="error" role="alert" hidden></div>
+    <div class="workspace">
+      <nav class="task-panel" aria-labelledby="tasks-heading"><div class="section-label"><h2 id="tasks-heading">Tasks</h2><span id="task-count" class="count">0</span></div><div id="tasks"><p class="muted">Tasks appear after import.</p></div><div class="trust-note"><strong>Based on received records</strong><p>Producer declarations describe reported work. A ledger receipt confirms import only.</p></div></nav>
+      <section class="timeline-panel" aria-labelledby="timeline-heading"><div class="timeline-header"><div><p class="eyebrow">TASK TIMELINE</p><h2 id="timeline-heading" tabindex="-1">Choose a file to begin</h2></div><span id="event-count" class="count">0 events</span></div><p class="order-note">Occurrence time, then event ID. Unknown times follow. This order does not establish causality.</p><ol id="timeline" class="timeline"></ol><div id="empty-state" class="empty-state"><span aria-hidden="true" class="empty-symbol">≋</span><h3>Start with the source.</h3><p>Import a structured event file to see its tasks and reports here.</p><p>No account, AI service or live connection needed.</p></div></section>
+      <aside class="source-panel" aria-labelledby="source-title"><div class="section-label"><h2 id="source-title" tabindex="-1">Source inspector</h2><span class="source-icon" aria-hidden="true">{ }</span></div><div id="source-content"><p class="muted">Select an event's “Inspect source” button to see its exact producer record and separate ledger receipt.</p></div></aside>
+    </div>
+  </main>
+  <footer>Agent Work Ledger <span aria-hidden="true">/</span> Independent, local-first diagnostics <span aria-hidden="true">·</span> No automatic collection</footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

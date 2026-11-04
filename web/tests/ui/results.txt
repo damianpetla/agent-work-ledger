@@ -1,0 +1,13 @@
+PASS empty workspace and visible reconstruction instructions
+PASS ordinary file selection displays sorted multitask reports and separate times
+PASS keyboard source activation focuses inspector and returns to event
+PASS reselecting identical file deduplicates and preserves original receipt
+PASS malformed, conflict and invalid UTF-8 inputs preserve selected history
+PASS task selection filters timeline and source consistently
+PASS reported verification basis and multiple runtime reports stay separate
+PASS HTML-like labels and summaries render literally without elements or execution
+PASS read lock prevents overlapping file imports and permits retry after read failure
+PASS reload clears session and ordinary reimport reconstructs timeline
+PASS ordinary viewing has no remote requests or uncaught JavaScript errors
+PASS accepted importer regressions pass through integrated server
+TOTAL 12 PASS 12 FAIL 0 SKIP 0

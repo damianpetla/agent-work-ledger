@@ -2,7 +2,7 @@
 
 **Tech Lead · gpt-6.1-sol · medium (configured)**
 
-Planning only. No application, collector, tests, runtime baseline or deployment exists. [Product brief](product-brief.md) defines value and scope; [event contract v1](event-contract.md) defines interoperability. Delivery selection and progress belong to the issue tracker, not this document.
+Local file import, timeline and source inspection are implemented for review, with author checks recorded in [UI evidence](../web/tests/ui/evidence.md). Independent source review, integrated QA and user evaluation remain separate gates. The later graph/receiver/producer slices below are plans, with no collector or deployment. [Product brief](product-brief.md) defines value and scope; [event contract v1](event-contract.md) defines interoperability. Delivery selection and progress belong to the issue tracker, not this document.
 
 ## Decisions and smallest trial
 
@@ -32,7 +32,7 @@ flowchart LR
   Read --> Projection
 ```
 
-Everything shown is planned; nothing is implemented or runtime verified. Browser memory and SQLite are distinct workspaces, not synchronized stores. The diagram is a review artifact, not evidence of runtime behavior.
+The File → Import → Memory → Views path is implemented; its author checks do not substitute for independent acceptance. Projection/Graph and the producer/receiver/database/read path remain planned. Browser memory and SQLite are distinct workspaces, not synchronized stores. The diagram is a review artifact, not evidence of runtime behavior.
 
 Keep three deep modules with small interfaces: import accepts previous events plus envelope and returns an unchanged/error or accepted snapshot/receipt summary; projection accepts a snapshot and returns linked evidence/diagnostics; durable receipt accepts an envelope and returns committed receipt or explicit error. Time/receipt ID sources are injected for deterministic tests. Do not introduce provider plugins or repository abstractions before they vary. Browser and Python validation use the same contract golden fixtures; receipt data never contaminates event equality. Tests cross these interfaces rather than inspecting private structures.
 
@@ -50,7 +50,7 @@ Technical issue links and exact per-parent coverage are maintained in the tracke
 
 ## Proportionate validation plan
 
-These are future controls, all currently **not run**. Developers author and run checks; an independent reviewer assesses source and test sensitivity; independent QA executes parent trials in the ordinary application. Use synthetic data only and isolated temporary storage/ports. There are no scripts/configurations yet: the implementation author must publish exact commands and target versions with each handoff. Planned commands below become usable only when their corresponding code exists.
+These are verification requirements. Local timeline author checks are recorded in [UI evidence](../web/tests/ui/evidence.md) and importer evidence; independent parent QA/user evaluation and later-slice controls are not established by those self-checks. Developers author and run checks; an independent reviewer assesses source and test sensitivity; independent QA executes parent trials in the ordinary application. Use synthetic data only and isolated temporary storage/ports. Local setup and check commands are now in README and the linked evidence; later-slice authors must publish their commands and target versions with each handoff. Planned commands below become usable only when their corresponding code exists.
 
 | Risk | Cheapest meaningful check and environment | Gate and owner |
 | --- | --- | --- |
@@ -67,4 +67,4 @@ Other technical children have no separate QA execution: required independent QA 
 
 The platform facts supporting this deliberately small stack are documented in [File API guidance](https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications), [Python 3.12 http.server](https://docs.python.org/3.12/library/http.server.html) and [Python 3.12 sqlite3](https://docs.python.org/3.12/library/sqlite3.html). File selection supports reading user-chosen local files. sqlite3 provides file-backed transactions without a separate database service. Python explicitly cautions that http.server has basic security checks and is unsuitable for production; the planned receiver therefore stays an isolated local trial, with explicit request controls, and does not establish a deployment architecture. These sources were checked for planning; chosen support targets still need actual runtime validation.
 
-Public instructions must document exact startup/stop and safe input paths, ephemeral versus durable data, local credential handling, producer activation, errors/retries and limitations. They must be generic and contain no private workflow rules or real recordings. This planning change does not implement them. Independent documentary review must check product/contract/issue agreement and walk through first import failure, competing ownership, revision after review and uncertain network receipt. Runtime baseline, application QA and user review remain unavailable until implementation. Deployment, backup/migration strategy, MCP hosting and factory-specific rollout need separate scope decisions.
+Public instructions must document exact startup/stop and safe input paths, ephemeral versus durable data, local credential handling, producer activation, errors/retries and limitations. They must be generic and contain no private workflow rules or real recordings. This planning change does not implement them. Independent documentary review must check product/contract/issue agreement and walk through first import failure, competing ownership, revision after review and uncertain network receipt. The local file runtime baseline and author checks are recorded in the linked evidence; independent application QA and user review remain separate acceptance gates. Deployment, backup/migration strategy, MCP hosting and factory-specific rollout need separate scope decisions.

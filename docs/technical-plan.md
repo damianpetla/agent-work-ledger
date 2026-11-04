@@ -2,7 +2,7 @@
 
 **Tech Lead · gpt-6.1-sol · medium (configured)**
 
-Local file import, timeline and source inspection are implemented for review, with author checks recorded in [UI evidence](../web/tests/ui/evidence.md). Independent source review, integrated QA and user evaluation remain separate gates. The pure evidence projection is supplied by DAM-35; the ordinary D consumer and receiver/producer slices remain pending, with no collector or deployment. [Product brief](product-brief.md) defines value and scope; [event contract v1](event-contract.md) defines interoperability. Delivery selection and progress belong to the issue tracker, not this document.
+Local file import, timeline and source inspection are implemented for review, with author checks recorded in [UI evidence](../web/tests/ui/evidence.md). Independent source review, integrated QA and user evaluation remain separate gates. The pure evidence projection is supplied by DAM-35; the ordinary D consumer is implemented for review with [author evidence](../web/tests/workspace/evidence.md); receiver/producer slices remain pending, with no collector or deployment. [Product brief](product-brief.md) defines value and scope; [event contract v1](event-contract.md) defines interoperability. Delivery selection and progress belong to the issue tracker, not this document.
 
 ## Decisions and smallest trial
 
@@ -10,7 +10,7 @@ The existing timeline uses plain HTML/CSS and JavaScript ES modules. The pure im
 
 First result: serve only public UI assets from a dedicated web directory over 127.0.0.1 using the standard-library static server. Local File API selection loads the public synthetic JSON example into browser memory. No backend ingestion or database exists. Reload/close clears the session and the UI must say so; reopen the unchanged source file to reconstruct it. This deliberate boundary avoids building a persistence engine before validating interpretation. Atomic imports retain the prior session on error; successful repeated imports retain one event per identity. The user identifies delegation, reported block and unknown runtime model in one timeline.
 
-Amended first result (DAM-30): retain the same importer and memory boundary, add the selected D graph over accepted events with a built-in synthetic byte-import example and a separate imported-file workspace. DAM-35 delivers the dependency-free [pure relation/attempt API](graph-api.md), without waiting/owner aggregation. DAM-36 consumes that accepted module in the ordinary application using locally packaged React Flow/Dagre assets, as the bounded selected-D decision; no CDN or remote runtime. The consumer must publish its locked build/dependency/license and local-asset evidence. No graph UI is delivered by DAM-35. Parent independent QA and user evaluation remain required.
+Amended first result (DAM-30): retain the same importer and memory boundary, add the selected D graph over accepted events with a built-in synthetic byte-import example and a separate imported-file workspace. DAM-35 delivers the dependency-free [pure relation/attempt API](graph-api.md), without waiting/owner aggregation. DAM-36 consumes that accepted module in the ordinary application using locally packaged React Flow/Dagre assets, as the bounded selected-D decision; no CDN or remote runtime. The consumer must publish its locked build/dependency/license and local-asset evidence. DAM-36 now supplies the ordinary graph UI with locked local React Flow 12.12.1, Dagre 2.0.0, React/DOM 19.3.1 and esbuild 0.25.12 build inputs. Dagre uses its official CJS entry to avoid its published ESM dynamic-require issue. Generated assets and complete third-party notices are committed, so viewing still requires only Python. No graph UI is delivered by DAM-35. Parent independent QA and user evaluation remain required.
 
 Residual second result (DAM-31): after actual DAM-30 acceptance, add scoped open-block/next-actor/ambiguity summaries using the delivered evidence projection. Those deferred computations are not claimed by DAM-35 or the selected D view.
 
@@ -26,7 +26,7 @@ flowchart LR
   Import --> Memory[Browser memory workspace]
   Memory --> Views[Timeline and source inspector]
   Memory --> Projection[Received record projection]
-  Projection --> Graph[Linked graph and waiting summary]
+  Projection --> Graph[Source-linked relation graph]
   Producer[Explicit local producer - third result] --> Receiver[Loopback HTTP receiver]
   Receiver --> DB[SQLite committed events and receipts]
   DB --> Read[Authenticated read adapter]
@@ -34,7 +34,7 @@ flowchart LR
   Read --> Projection
 ```
 
-The File → Import → Memory → Views path is implemented; its author checks do not substitute for independent acceptance. The pure Projection module is delivered separately by DAM-35; its ordinary Graph consumer and the producer/receiver/database/read path remain pending. Browser memory and SQLite are distinct workspaces, not synchronized stores. The diagram is a review artifact, not evidence of runtime behavior.
+The File → Import → Memory → Views path is implemented; its author checks do not substitute for independent acceptance. The pure Projection module is delivered separately by DAM-35; its ordinary D Graph consumer is implemented for review, while the producer/receiver/database/read path remains pending. Browser memory and SQLite are distinct workspaces, not synchronized stores. The diagram is a review artifact, not evidence of runtime behavior.
 
 Keep three deep modules with small interfaces: import accepts previous events plus envelope and returns an unchanged/error or accepted snapshot/receipt summary; projection accepts a snapshot and returns linked evidence/diagnostics; durable receipt accepts an envelope and returns committed receipt or explicit error. Time/receipt ID sources are injected for deterministic tests. Do not introduce provider plugins or repository abstractions before they vary. Browser and Python validation use the same contract golden fixtures; receipt data never contaminates event equality. Tests cross these interfaces rather than inspecting private structures.
 

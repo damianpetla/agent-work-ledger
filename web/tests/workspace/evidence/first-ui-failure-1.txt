@@ -1,0 +1,13 @@
+PASS empty workspace and visible reconstruction instructions
+PASS ordinary file selection displays sorted multitask reports and separate times
+FAIL keyboard source activation focuses inspector and returns to event: {"active":"<button type=\"button\" class=\"source-button\" data-event-id=\"demo:03\" aria-pressed=\"true\">Inspect source →</button>","source":"demo:03","errors":[]}
+
+'' !== 'source-title'
+
+AssertionError [ERR_ASSERTION]: {"active":"<button type=\"button\" class=\"source-button\" data-event-id=\"demo:03\" aria-pressed=\"true\">Inspect source →</button>","source":"demo:03","errors":[]}
+
+'' !== 'source-title'
+
+    at file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/ui/check.mjs:86:10
+    at async step (file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/ui/check.mjs:64:36)
+    at async file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/ui/check.mjs:79:2

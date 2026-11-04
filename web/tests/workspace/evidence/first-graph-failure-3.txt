@@ -1,0 +1,13 @@
+PASS real startup import, distinct attempts/checks, actual receipt and source-complete disclosures
+PASS 1440 real pointer text/padding, stationary node/source/Close/Return and pan/zoom
+PASS 1280 real pointer text/padding, stationary node/source/Close/Return and pan/zoom
+PASS 777 real pointer text/padding, stationary node/source/Close/Return and pan/zoom
+PASS multi-source entity is not canonical JSON; revision, QA v2, runtime and explicit edge source
+PASS distinct imported topology, cached Example receipts, failed import keeps graph and selected source
+PASS arbitrary branch/cycle/disconnected topology and cross-task diagnostic source lookup
+FAIL 128-char IDs, long role, 500-code-point summary and 200% graph text natural heights: physical hit .graph-card[data-event-id="long:check"] {"x":671.112548828125,"y":-633.6812744140625,"hit":false}
+AssertionError [ERR_ASSERTION]: physical hit .graph-card[data-event-id="long:check"] {"x":671.112548828125,"y":-633.6812744140625,"hit":false}
+    at physical (file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:66:653)
+    at async file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:80:506
+    at async step (file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:61:35)
+    at async file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:80:2

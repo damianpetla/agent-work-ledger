@@ -1,0 +1,7 @@
+PASS startup bytes are accepted with real receipts without populating Imported files
+PASS file imports accumulate independently and reject atomically with first receipts retained
+PASS presentation preserves every literal edge and all context endpoints, with separate check cards and other evidence
+PASS cross-task diagnostic sources resolve exact accepted JSON and separate receipts from the full workspace
+PASS branches cycles and disconnected records remain endpoint and source complete in the display
+PASS invalid startup bytes produce no fabricated sample, and reopening Example keeps its first receipt
+TOTAL 6 PASS 6 FAIL 0 SKIP 0

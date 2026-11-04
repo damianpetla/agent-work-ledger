@@ -1,0 +1,68 @@
+PASS empty workspace and visible reconstruction instructions
+PASS ordinary file selection displays sorted multitask reports and separate times
+PASS keyboard source activation focuses inspector and returns to event
+PASS reselecting identical file deduplicates and preserves original receipt
+PASS malformed, conflict and invalid UTF-8 inputs preserve selected history
+PASS exact 1 MiB file accepts 1000 events in contract order and rejects invalid boundaries atomically
+PASS tied and unknown occurrence times keep exact source-link order
+FAIL task selection filters timeline and source consistently: The input did not match the regular expression /demo:other/. Input:
+
+'demo:01Assignment / delegation · Producer declarationSource & correlationSourceSynthetic local exampleProducerdemo:fixtureSyntheticYes · synthetic exampleReporting actordemo:coordinatorActor labelCoordinatorRole labelPlannerTaskdemo:launchRundemo:buildAttemptdemo:v1Check targetunknownOccurred2026-11-04 10:00:00.000 UTCSource identity, labels and occurrence time are producer declarations.Explicit work assignment · Parent run: unknownLedger receipt · current-tab acceptanceImported2026-11-04 17:59:56.916 UTCReceipt ID752c8b52-a0bd-4d02-a6dd-9edece1936baChannelfileConfirms acceptance into this tab only. It does not verify the report, review quality or completion.Exact producer event{\n' +
+  '  "eventId": "demo:01",\n' +
+  '  "taskId": "demo:launch",\n' +
+  '  "actorId": "demo:coordinator",\n' +
+  '  "actorLabel": "Coordinator",\n' +
+  '  "roleLabel": "Planner",\n' +
+  '  "runId": "demo:build",\n' +
+  '  "attemptId": "demo:v1",\n' +
+  '  "kind": "assignment",\n' +
+  '  "occurredAt": "2026-11-04T10:00:00.000Z",\n' +
+  '  "source": {\n' +
+  '    "producerId": "demo:fixture",\n' +
+  '    "label": "Synthetic local example",\n' +
+  '    "synthetic": true\n' +
+  '  },\n' +
+  '  "data": {\n' +
+  '    "fromActorId": "demo:coordinator",\n' +
+  '    "toActorId": "demo:builder",\n' +
+  '    "parentRunId": null\n' +
+  '  }\n' +
+  '}Separate ledger receipt{\n' +
+  '  "eventId": "demo:01",\n' +
+  '  "receivedAt": "2026-11-04T17:59:56.916Z",\n' +
+  '  "receiptId": "752c8b52-a0bd-4d02-a6dd-9edece1936ba",\n' +
+  '  "channel": "file"\n' +
+  '}Return to selected event'
+
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /demo:other/. Input:
+
+'demo:01Assignment / delegation · Producer declarationSource & correlationSourceSynthetic local exampleProducerdemo:fixtureSyntheticYes · synthetic exampleReporting actordemo:coordinatorActor labelCoordinatorRole labelPlannerTaskdemo:launchRundemo:buildAttemptdemo:v1Check targetunknownOccurred2026-11-04 10:00:00.000 UTCSource identity, labels and occurrence time are producer declarations.Explicit work assignment · Parent run: unknownLedger receipt · current-tab acceptanceImported2026-11-04 17:59:56.916 UTCReceipt ID752c8b52-a0bd-4d02-a6dd-9edece1936baChannelfileConfirms acceptance into this tab only. It does not verify the report, review quality or completion.Exact producer event{\n' +
+  '  "eventId": "demo:01",\n' +
+  '  "taskId": "demo:launch",\n' +
+  '  "actorId": "demo:coordinator",\n' +
+  '  "actorLabel": "Coordinator",\n' +
+  '  "roleLabel": "Planner",\n' +
+  '  "runId": "demo:build",\n' +
+  '  "attemptId": "demo:v1",\n' +
+  '  "kind": "assignment",\n' +
+  '  "occurredAt": "2026-11-04T10:00:00.000Z",\n' +
+  '  "source": {\n' +
+  '    "producerId": "demo:fixture",\n' +
+  '    "label": "Synthetic local example",\n' +
+  '    "synthetic": true\n' +
+  '  },\n' +
+  '  "data": {\n' +
+  '    "fromActorId": "demo:coordinator",\n' +
+  '    "toActorId": "demo:builder",\n' +
+  '    "parentRunId": null\n' +
+  '  }\n' +
+  '}Separate ledger receipt{\n' +
+  '  "eventId": "demo:01",\n' +
+  '  "receivedAt": "2026-11-04T17:59:56.916Z",\n' +
+  '  "receiptId": "752c8b52-a0bd-4d02-a6dd-9edece1936ba",\n' +
+  '  "channel": "file"\n' +
+  '}Return to selected event'
+
+    at file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/ui/check.mjs:158:325
+    at async step (file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/ui/check.mjs:64:36)
+    at async file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/ui/check.mjs:155:2

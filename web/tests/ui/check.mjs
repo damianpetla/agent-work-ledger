@@ -45,11 +45,13 @@ try {
  };
  async function wait(expression){for(let n=0;n<200;n++){if(await evaluate(expression))return;await sleep(25);}throw Error('Timeout: '+expression);}
  const text=selector=>evaluate(`document.querySelector(${JSON.stringify(selector)})?.textContent`);
- async function open(path='/'){await command('Page.bringToFront');await command('Page.navigate',{url:origin+path});await wait('document.readyState === "complete"');}
+ async function open(path='/'){await command('Page.bringToFront');await command('Page.navigate',{url:origin+path});await wait('document.readyState === "complete"');if(path==='/'){await wait('document.querySelector("#files-workspace")!==null');await evaluate('document.querySelector("#files-workspace").click()');await wait('document.querySelector("#event-count")?.textContent === "0 events"');}}
  async function selectFile(path){
   const {root}=await command('DOM.getDocument');const {nodeId}=await command('DOM.querySelector',{nodeId:root.nodeId,selector:'#event-file'});
   await command('DOM.setFileInputFiles',{nodeId,files:[path]});
   await wait('!document.querySelector("#event-file").disabled && !document.querySelector("#import-status").textContent.startsWith("Reading")');
+  // Deliberate D seam: timeline is an alternate disclosure; inspection starts closed.
+  await evaluate('document.querySelector("#all-records").open=true;if(!document.querySelector(".source-panel")&&document.querySelector("#import-status").textContent.startsWith("Import complete"))document.querySelector(".source-button")?.click()');
  }
  const example=join(root,'web/examples/synthetic-timeline.json');
  const fixture=name=>join(root,'web/tests/import',name);
@@ -62,7 +64,7 @@ try {
  async function step(name,run){try{await run();report.push('PASS '+name);}catch(error){report.push('FAIL '+name+': '+error.message);throw error;}}
  await open();
  await step('empty workspace and visible reconstruction instructions',async()=>{
-  assert.match(await text('.memory-note'),/Reloading or closing clears/);assert.match(await text('#empty-state'),/Start with the source/);
+  assert.match(await text('.memory-note'),/reloading or closing clears/);assert.match(await text('#empty-state'),/Start with the source/);
   assert.equal(await evaluate('document.querySelectorAll(".event-card").length'),0);
   assert.equal(await evaluate('document.querySelector("#file-help a").getAttribute("href")'),'examples/synthetic-timeline.json');
  });
@@ -81,6 +83,7 @@ try {
   assert.equal(await evaluate('document.activeElement.dataset.eventId'),'demo:03');
   await command('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
   await command('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await wait('document.activeElement.id === "source-title"');
   assert.equal(await evaluate('document.activeElement.id'),'source-title',JSON.stringify({active:await evaluate('document.activeElement.outerHTML'),source:await text('.source-id'),errors:scriptErrors}));
   assert.match(await text('#source-content'),/example-model/);assert.match(await text('#source-content'),/unknown · No reported tool verification basis/);
   const raw=await text('.raw-record pre');assert.equal(JSON.parse(raw).eventId,'demo:03');assert.equal(JSON.parse(raw).data.verified.model,null);
@@ -131,7 +134,7 @@ try {
   assert.equal(await text('#timeline'),priorTimeline);assert.equal(await text('#source-content'),priorSource);
  });
  await step('tied and unknown occurrence times keep exact source-link order',async()=>{
-  await command('Page.reload');await wait('document.readyState === "complete" && document.querySelector("#event-count")?.textContent === "0 events"');
+  await open();
   const events=[
    makeEvent('order:null:z'),
    makeEvent('order:tie:z','2026-01-02T03:04:05.000Z'),
@@ -150,9 +153,9 @@ try {
   }
  });
  await step('task selection filters timeline and source consistently',async()=>{
-  await command('Page.reload');await wait('document.readyState === "complete" && document.querySelector("#event-count")?.textContent === "0 events"');
+  await open();
   await selectFile(example);
-  await evaluate('document.querySelectorAll(".task-button")[1].click()');assert.equal(await text('#timeline-heading'),'demo:other-task');assert.equal(await evaluate('document.querySelectorAll(".event-card").length'),1);assert.match(await text('#source-content'),/demo:other/);
+  await evaluate('document.querySelectorAll(".task-button")[1].click()');await wait('document.querySelector("#timeline-heading").textContent === "demo:other-task"');await evaluate('document.querySelector("#all-records").open=true;document.querySelector(".source-button").click()');assert.equal(await text('#timeline-heading'),'demo:other-task');assert.equal(await evaluate('document.querySelectorAll(".event-card").length'),1);assert.match(await text('#source-content'),/demo:other/);
   await evaluate('document.querySelectorAll(".task-button")[0].click()');
  });
  await step('reported verification basis and multiple runtime reports stay separate',async()=>{
@@ -178,7 +181,7 @@ try {
   await evaluate('File.prototype.arrayBuffer=originalBuffer');await selectFile(example);assert.match(await text('#import-status'),/0 new, 6 duplicate/);
  });
  await step('reload clears session and ordinary reimport reconstructs timeline',async()=>{
-  await command('Page.reload');await wait('document.readyState === "complete" && document.querySelector("#event-count")?.textContent === "0 events"');
+  await open();
   assert.equal(await evaluate('document.querySelectorAll(".event-card").length'),0);await selectFile(example);assert.match(await text('#import-status'),/6 new, 0 duplicate/);
   const image=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});await writeFile(join(output,'timeline.png'),Buffer.from(image.data,'base64'));
  });

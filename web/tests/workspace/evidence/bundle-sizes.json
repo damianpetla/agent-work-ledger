@@ -1,0 +1,26 @@
+[
+  {
+    "path": "web/graph-ui/graph.js",
+    "bytes": 491010,
+    "gzipBytes": 158305,
+    "sha256": "aa7b93813c28d8f43d18994cbb6ce60f5c98c98a06fe9ee2339f3b406f4d771e"
+  },
+  {
+    "path": "web/graph-ui/graph.js.LEGAL.txt",
+    "bytes": 2356,
+    "gzipBytes": 375,
+    "sha256": "500c5424b9ccd8d9a62faa1b7e49341a3e7371f132471e65236c76db3b20cf46"
+  },
+  {
+    "path": "web/graph-ui/graph.css",
+    "bytes": 23704,
+    "gzipBytes": 4602,
+    "sha256": "32abc9e1c3de7ac8dfbf494f624912f87c587670b80b2b7314e942bb1e824f4d"
+  },
+  {
+    "path": "web/graph-ui/THIRD-PARTY-LICENSES.txt",
+    "bytes": 25889,
+    "gzipBytes": 2155,
+    "sha256": "7e3e6a06af72c3b4d9c758776c97cf919962df93f890b3dea15fbdd015fa6bdb"
+  }
+]

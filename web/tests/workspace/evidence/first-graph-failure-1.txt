@@ -1,0 +1,7 @@
+FAIL real startup import, distinct attempts/checks, actual receipt and source-complete disclosures: SyntaxError: Invalid regular expression: /scale(([^)]+)/: Unterminated group
+Error: SyntaxError: Invalid regular expression: /scale(([^)]+)/: Unterminated group
+    at evaluate (file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:43:36)
+    at async audit (file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:73:37)
+    at async file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:75:476
+    at async step (file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:61:35)
+    at async file:///Users/loop/Studio/.local/worktrees/agent-work-ledger-dam36-workspace/web/tests/workspace/browser.mjs:75:2

@@ -71,6 +71,25 @@ try {
  const transform=()=>evaluate(`document.querySelector('.react-flow__viewport').style.transform`);
  async function exact(id){await wait(`document.querySelector('.source-id')?.textContent===${JSON.stringify(id)}`);const row=await evaluate(`[...document.querySelectorAll('.raw-record pre')].map(n=>JSON.parse(n.textContent))`);assert.deepEqual(row[0],eventMap.get(id));assert.deepEqual(row[1],receiptMap.get(id));assert.equal(row[1].channel,'mcp');return row}
  async function shot(name){const result=await command('Page.captureScreenshot',{format:'png'});await writeFile(join(output,name+'.png'),Buffer.from(result.data,'base64'))}
+ async function waitForParentEdge(eventId,taskId){
+  // Fresh marks accepted data; ReactFlow measures/publishes new edges separately.
+  const result=await evaluate(`new Promise(resolve=>{
+   const started=performance.now();let previous=null,consecutive=0,frames=0,frame,done=false;
+   const edgeIds=()=>[...document.querySelectorAll('[data-edge-id]')].map(node=>node.dataset.edgeId);
+   const initialEdges=edgeIds();
+   function finish(ok,edgeId=null){if(done)return;done=true;clearTimeout(deadline);cancelAnimationFrame(frame);resolve({ok,edgeId,frames,elapsedMs:performance.now()-started,initialEdges,finalEdges:edgeIds()})}
+   const deadline=setTimeout(()=>finish(false),5000);
+   function observe(){frames++;const id=edgeIds().find(value=>{try{const tuple=JSON.parse(value);return tuple[1]===${JSON.stringify(eventId)}&&tuple[2]==='parent-run'}catch{return false}});consecutive=id&&id===previous?consecutive+1:id?1:0;previous=id;if(consecutive>=2)finish(true,id);else frame=requestAnimationFrame(observe)}
+   frame=requestAnimationFrame(observe);
+  })`);
+  if(!result.ok){
+   result.currentTask=await text('#timeline-heading');
+   try{const raw=new Uint8Array(await(await fetch(origin+'/v1/snapshot',{headers:{Authorization:'Bearer '+token},signal:AbortSignal.timeout(2000)})).arrayBuffer());const {acceptDurableSnapshot}=await import('../../import/durable.js'),{projectTask}=await import('../../graph/project.js');const accepted=acceptDurableSnapshot(raw);result.projectedParentEdges=accepted.ok?projectTask(accepted.snapshot,taskId).edges.filter(edge=>edge.kind==='parent-run'&&edge.sourceEventIds.includes(eventId)):[];result.snapshotAccepted=accepted.ok}catch{result.snapshotUnavailable=true}
+  }
+  await writeFile(join(output,'edge-readiness.json'),JSON.stringify({eventId,taskId,...result},null,2));
+  assert.equal(result.ok,true,'Expected parent-run edge did not settle within 5 seconds; see edge-readiness.json');
+  return result.edgeId;
+ }
  async function refreshInspectionRegression(){
   await open();
   let number=1;while(oracle.data.projects.some(p=>p.projectId===`refresh${number}:project`))number++;
@@ -109,7 +128,7 @@ try {
   // A now-resolved parent relation changes identity; invalidate its obsolete edge panel.
   const child={...first,eventId:prefix+':child',runId:prefix+':child-run',attemptId:prefix+':child-attempt',data:{...first.data,parentRunId:prefix+':parent-run'}};
   await call('append_events',{sessionId,envelopeJson:JSON.stringify({formatVersion:1,events:[child]})});await refresh();
-  const edgeId=await evaluate(`[...document.querySelectorAll('[data-edge-id]')].map(n=>n.dataset.edgeId).find(id=>{const tuple=JSON.parse(id);return tuple[1]===${JSON.stringify(child.eventId)}&&tuple[2]==='parent-run'})`);assert.ok(edgeId);
+  const edgeId=await waitForParentEdge(child.eventId,taskId);assert.ok(edgeId);
   await evaluate(`document.querySelector('[data-edge-id='+CSS.escape(${JSON.stringify(edgeId)})+']').focus({preventScroll:true})`);await key('Enter');await wait(`document.querySelector('.projection-detail')!==null`);
   const parent={...first,eventId:prefix+':parent',runId:prefix+':parent-run',attemptId:prefix+':parent-attempt'};
   await call('append_events',{sessionId,envelopeJson:JSON.stringify({formatVersion:1,events:[parent]})});await refresh();await wait(`document.querySelector('.source-panel')===null`);

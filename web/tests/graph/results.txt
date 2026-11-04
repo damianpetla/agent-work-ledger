@@ -1,0 +1,28 @@
+PASS assignment links explicit participants and assigned execution, not reporter ownership
+PASS parent run, advice, actor handoff, revision and checks express only explicit relations
+PASS QA missing target is diagnostic, never a valid check link
+PASS QA wrong kind target is diagnostic, never a valid check link
+PASS QA cross task target is diagnostic, never a valid check link
+PASS QA conflicting attempt target is diagnostic, never a valid check link
+PASS QA conflicting run actor target is diagnostic, never a valid check link
+PASS resolution links only the exact block with matching task/run/attempt scope
+PASS revision cannot follow a previous attempt from another run
+PASS cycles remain navigable and explicitly diagnostic
+PASS unknown and empty tasks have no fabricated nodes
+PASS single context-free advice record is source-complete without invented run
+PASS typed IDs preserve delimiter-bearing and overlapping actor/run/attempt identities
+PASS branches and disconnected records retain all edges and exact separate sources
+PASS multiple runtime and completion reports stay separate producer facts
+PASS reporter labels never leak to target; conflicting labels have separate event actions
+PASS projection is unchanged across import order, timestamp ties/nulls and duplicate receipts
+PASS accepted input remains deeply frozen and byte-equivalent after projection
+PASS review unknown outcome targets another run explicitly, no check-context target
+PASS qa unknown outcome targets another run explicitly, no check-context target
+PASS parent missing run never invents a valid endpoint
+PASS parent wrong kind run never invents a valid endpoint
+PASS parent foreign run never invents a valid endpoint
+PASS all edges have actual endpoints and every source action resolves to accepted JSON
+PASS programmer misuse is explicit TypeError, not a data diagnostic
+PASS wrong-kind references also recognize actor participants and run/attempt identities
+PASS cross-task reused execution IDs expose the exact conflicting source records
+TOTAL 27 PASS 27 FAIL 0 SKIP 0

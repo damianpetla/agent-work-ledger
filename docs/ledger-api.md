@@ -21,7 +21,19 @@ Legacy v1 files remain unregistered in the separate file workspace. Explicitly r
 
 ## Shared application core
 
-DAM-37 owns a Python `Ledger` facade (implementation module `agent_work_ledger.ledger`) with these public methods. Each returns the versioned result below or raises `LedgerError` with the error fields below; it never accepts caller-supplied receipts/timestamps. Clock and opaque ID sources are constructor-injected for deterministic tests; production uses UTC and random IDs. The persistent owner/transaction lock is held by the service, not a client.
+DAM-37 owns a Python `Ledger` facade (implementation module `agent_work_ledger.ledger`), including database ownership and lifecycle. Public constructor:
+
+```python
+Ledger(data_dir, *, now=None, receipt_id=None, fault=None)
+```
+
+`data_dir` is a filesystem path (`str` or `os.PathLike`) resolved to the canonical private data directory; the database is its fixed `ledger.sqlite3`. `now` is an optional zero-argument callable returning a valid contract UTC timestamp; `receipt_id` is an optional zero-argument callable returning a valid server receipt ID. Defaults use the UTC clock and random UUIDs. No client can supply receipt metadata through an operation. `fault` is an optional test-only callable taking exactly `"before_commit"` or `"after_commit"`, invoked for an append transaction containing new events immediately before commit or after durable commit but before returning its receipt. Default is no hook. Tests may raise/terminate the worker there: before-commit failure rolls back, after-commit failure preserves the committed history for retry. This seam is never exposed through MCP, HTTP, configuration or the production CLI.
+
+The constructor itself acquires exclusive lifetime ownership for that canonical database **before** opening/initializing/validating storage, and returns only after startup validation succeeds. Lock acquisition and release belong entirely to DAM-37; there is no prerequisite ASGI/service lock. A second `Ledger` instance in the same or another process targeting that database fails with `LedgerError(code="busy", ...)` and an actionable already-owned message, without modifying the database. Startup failure closes partial resources and releases acquired ownership. Corrupt/unreadable storage uses `storage_unavailable`, unknown storage version uses `unsupported_version` with field `storageVersion`; both preserve the file and supply recovery guidance. OS-backed process ownership must release on process exit/crash; stale sentinel-file existence alone is not an ownership lock.
+
+`Ledger` implements `__enter__` returning the already-open instance, `__exit__` calling `close()` without suppressing the caller's exception, and public idempotent `close()` returning `None`. `close()` rolls back any uncommitted transaction, closes the connection and releases lifetime ownership, even on cleanup failure; previously committed history survives. Operations on a closed instance raise `LedgerError(code="storage_unavailable", ...)` with reopen guidance. Reopening is a new constructor call. DAM-37 independent QA can therefore run two ordinary Python worker processes using only `with Ledger(data_dir) as ledger: ...`, hold the first owner, observe the second rejection, then close/crash the first and verify a fresh owner opens the unchanged history. No DAM-38 application is needed for that gate.
+
+The operation methods below return the versioned success result or raise `LedgerError` with the error fields below. Constructor/lifecycle calls return an instance/None, not an operation-result envelope; their errors use the same bounded fields for callers to report.
 
 | Method | Input | Success `data` |
 | --- | --- | --- |
@@ -42,21 +54,36 @@ Bound the initial single-owner ledger to 1,000 projects, 1,000 sessions, 10,000 
 
 ## Errors and transport mapping
 
-| Core code | Condition / remedy | HTTP read status |
-| --- | --- | --- |
-| `invalid_input`, `invalid_utf8`, `leading_bom`, `invalid_json`, `duplicate_key`, `invalid_schema` | Correct raw text/bytes or named field | 400 |
-| `unsupported_version` | Unsupported producer/service version; use documented version | 400 |
-| `input_limit`, `event_limit`, `storage_limit` | Split valid input or use supported ledger capacity; no partial writes | 413 |
-| `event_id_conflict` | Keep old event; changed report needs new eventId | 409 |
-| `registration_conflict`, `session_task_mismatch` | Reuse original binding or choose genuinely new identities; never overwrite | 409 |
-| `project_not_found`, `session_not_found` | Explicitly register the missing entity first | 404 |
-| `busy`, `storage_unavailable`, `receipt_error` | Preserve input IDs/content, correct environment and retry | 503 |
+Registration and append are **MCP-only operations**. A valid tool invocation that reaches the core returns its domain failure as a normal successful MCP protocol response (HTTP 200 in the selected JSON response mode), with `isError: true` and the versioned `ok:false` structured/text envelope. A domain conflict is not an HTTP 409, and a missing registered entity is not an HTTP 404. Do not map domain error codes to the MCP HTTP status. The same rule applies to core busy/storage errors reached during a tool call. SDK-level malformed request/unknown method/tool/invalid arguments remain protocol errors before domain dispatch.
+
+| Core code | Domain condition / remedy |
+| --- | --- |
+| `invalid_input`, `invalid_utf8`, `leading_bom`, `invalid_json`, `duplicate_key`, `invalid_schema` | Correct raw text/bytes or named field |
+| `unsupported_version` | Unsupported producer version in an append; use documented version |
+| `input_limit`, `event_limit`, `storage_limit` | Split valid input or use supported ledger capacity; no partial writes |
+| `event_id_conflict` | Keep old event; changed report needs new eventId |
+| `registration_conflict`, `session_task_mismatch` | Reuse original binding or choose genuinely new identities; never overwrite |
+| `project_not_found`, `session_not_found` | Explicitly register the missing entity first |
+| `busy`, `storage_unavailable`, `receipt_error` | Preserve input IDs/content, correct environment and retry |
+
+Actual HTTP boundaries are separate:
+
+| Boundary | HTTP status / payload |
+| --- | --- |
+| Authenticated `GET /v1/snapshot` or `GET /v1/health`, available core | 200 and the documented `ok:true` read envelope |
+| Read route cannot obtain valid storage/snapshot (`busy` or `storage_unavailable`) | 503 and versioned `ok:false` error envelope; never partial/empty success |
+| Missing/wrong bearer on a protected read or `/mcp` | 401 before dispatch, `WWW-Authenticate: Bearer`; transport rejection, not MCP tool domain result |
+| Invalid present Host/Origin on a protected read or `/mcp` | 403 before dispatch; transport rejection |
+| Outer `/mcp` body exceeds request bound | 413 before tool/core dispatch; separate from inner-envelope `input_limit` tool error |
+| Unknown HTTP route / unsupported method | 404 / 405; no invented registration or append HTTP endpoint |
+
+Storage constructor/version/corruption errors prevent readiness/startup rather than producing a fictitious HTTP write response. Only the existing read routes can produce the read failures above; registration/append-specific errors have no HTTP read-status mapping.
 
 No response/network loss means **unconfirmed**, never accepted or failed work. Retry identical event IDs/content. Before-commit interruption leaves the prior state; after-commit/before-response interruption is recovered by idempotent retry. Unsupported/corrupt storage fails startup with recovery guidance and leaves files intact; this is not an empty successful ledger. Startup process-ownership errors are explicit, not an HTTP success.
 
 ## MCP adapter and same-origin reads
 
-DAM-38 owns one ASGI application and one process/database owner. Use official pinned SDK `MCPServer` with Streamable HTTP at exact `/mcp`, JSON responses and stateless transport. SDK handles the protocol/version/client era. Public support initially covers modern protocol `2026-07-28` with pinned SDK and Inspector clients in [local-service.md](local-service.md). Protocol backward compatibility is an SDK capability, not an untested product support claim. No product task session depends on any MCP transport state.
+DAM-38 owns one ASGI application whose startup constructs exactly one DAM-37 `Ledger(data_dir)` instance; all tools/read routes share it. Startup failure prevents readiness. Shutdown drains requests and calls `close()` in a finally block. The Ledger instance acquires/releases ownership; ASGI does not implement a second lifetime-lock protocol. Use official pinned SDK `MCPServer` with Streamable HTTP at exact `/mcp`, JSON responses and stateless transport. SDK handles the protocol/version/client era. Public support initially covers modern protocol `2026-07-28` with pinned SDK and Inspector clients in [local-service.md](local-service.md). Protocol backward compatibility is an SDK capability, not an untested product support claim. No product task session depends on any MCP transport state.
 
 Tools (exact names and keys; reject unknown arguments):
 
@@ -76,7 +103,7 @@ Outer MCP request maximum: 4,194,304 bytes, bounded even without Content-Length.
 
 ## Storage and safe hydration
 
-One service holds exclusive lifetime process ownership of the chosen SQLite database (including startup validation); a second owner fails clearly. Serialize transactions with bounded busy wait (5 seconds maximum) and explicit rollback. Use SQLite local files on a local filesystem, foreign keys enabled, synchronous FULL; transaction commit before acknowledgement. No network filesystems/multi-worker DB guarantees. WAL is optional only with explicit backup/checkpoint recovery and process crash tests. Data directory permission 0700; database/backup/token permissions 0600. Startup rejects unknown storage versions or failed integrity/binding/receipt consistency checks, never deletes/recreates the file. No historical DB exists before this slice; future upgrades must add tested migration/backup handling rather than reinterpret version 1. Stop the dedicated service before copying database backups (or use SQLite's consistent backup API); never copy a live DB file alone with an unaccounted WAL. Recovery creates a separate checked copy, preserving the failed original.
+One DAM-37 Ledger instance holds exclusive lifetime process ownership of the chosen SQLite database from construction through close/crash (including startup validation); the service consumes that lifecycle, and a second owner fails clearly. Serialize transactions with bounded busy wait (5 seconds maximum) and explicit rollback. Use SQLite local files on a local filesystem, foreign keys enabled, synchronous FULL; transaction commit before acknowledgement. No network filesystems/multi-worker DB guarantees. WAL is optional only with explicit backup/checkpoint recovery and process crash tests. Data directory permission 0700; database/backup/token permissions 0600. Startup rejects unknown storage versions or failed integrity/binding/receipt consistency checks, never deletes/recreates the file. No historical DB exists before this slice; future upgrades must add tested migration/backup handling rather than reinterpret version 1. Stop the dedicated service before copying database backups (or use SQLite's consistent backup API); never copy a live DB file alone with an unaccounted WAL. Recovery creates a separate checked copy, preserving the failed original.
 
 DAM-38 adds one documented browser export `acceptDurableSnapshot(rawBytes)` in `web/import/durable.js`. Input is the raw `/v1/snapshot` JSON response; success `{ok:true,snapshot,projects,sessions}`, error `{ok:false,error}` without snapshot. Validate service version/schema, raw UTF-8/duplicate-key/size/depth controls, complete v1 event shapes, unique event IDs, registration ID/binding uniqueness, each event's exact registered task binding, and one-to-one receipt correspondence (no missing/duplicate/extra receipt), valid UTC timestamps/nonempty opaque IDs and known `mcp` channel. Validate counts/limits before publishing anything. Freeze nested producer/receipt/registration objects; canonicalize ordering. Return a snapshot accepted by existing `projectTask/taskIds/timeline` APIs without generating receipts or calling the file-import receipt path. Importer internal helpers may be shared; the existing raw file API/fixtures remain unchanged. Adapter failure leaves prior application snapshot and graph/source selection intact. Validate the entire global source map before selected-session projection; never trust server JSON through an unchecked cast.
 

@@ -8,11 +8,9 @@ The first user is an individual running a small agent workflow locally. The prod
 
 ## Current boundary and first evaluation
 
-The repository includes a local file timeline and source inspector with synthetic examples. Independent source review, integrated QA and user evaluation are separate gates; author checks alone do not establish acceptance. Live reporting, graphs and deployment remain unimplemented.
+The repository includes a local file timeline and source inspector. The authorized amended first result (DAM-30) adds the selected D graph over actual accepted v1 records, a bundled explicitly synthetic example loaded through the ordinary byte importer, task selection and secondary diagnostic file import. DAM-35 provides the [pure evidence projection](graph-api.md); DAM-36 provides its ordinary application consumer. Author checks do not establish independent acceptance. The working graph UI, integrated QA and actual user evaluation remain pending until delivered.
 
-First trial: load the supplied local example and identify the delegation, reported block and unknown runtime model from its timeline.
-
-The example is explicitly synthetic and loads through the ordinary documented input path. The evaluator can inspect source records and repeat the import, including invalid and duplicate inputs. This evaluates local interpretation and usability; it does not demonstrate a live agent connection. No external account, AI call or private conversation history should be needed.
+The first evaluation traces delegation → failed QA → revised attempt → explicit recheck, then inspects original accepted events and separate current-tab receipts. Example and imported-file workspaces stay separate in browser memory; reload resets them. No external account, AI call or private history is required. Invalid startup input shows an error, never a fabricated success graph. Every imported record remains source-accessible, including branches, cycles and unresolved references. D is not a live collector, registered project/session/day directory or completion certification.
 
 ## Terminology
 
@@ -33,7 +31,7 @@ The technical contract will define exact identifiers, cardinality and validation
 
 Events must preserve identity and correlations across repeated imports and delivery retries. Repeating the same event must not duplicate it; conflicting content under an existing identity must produce an explicit error rather than silent replacement. Invalid input must have actionable feedback. Ordering must remain deterministic for ties and out-of-order reports. Reported occurrence time and locally recorded receipt/import time have different meanings and must remain distinguishable.
 
-Views must link their conclusions back to source records. The intended task view includes a timeline and, in a subsequent result, a labelled graph covering delegation, consultation, block/resolution, review, QA and rework. Revisions must remain distinct: earlier review/QA evidence does not automatically apply to a new attempt. Waiting reason and next responsible actor are shown only when the received records support them; missing or conflicting information remains unknown or ambiguous.
+Views must link their conclusions back to source records. The intended task view includes a timeline and, in the amended first result, a labelled graph covering delegation, consultation, block/resolution, review, QA and rework. Revisions must remain distinct: earlier review/QA evidence does not automatically apply to a new attempt. Waiting reason and next responsible actor are shown only when the received records support them; missing or conflicting information remains unknown or ambiguous.
 
 Record the source and provenance of assertions, including whether information is declared or independently tool-verified and the basis of that verification. Confidence must be expressed with its source or as unknown, not as an invented numeric probability. Configured model/effort and verified runtime model/effort are separate facts; either may be unavailable. A successful event receipt proves receipt, not the truth of the producer's assertion. Self-reports cannot prove review quality, independence or actual completion. Unknown never means pass.
 
@@ -43,8 +41,8 @@ Collect structured diagnostic metadata needed for the task rather than transcrip
 
 The following describes product boundaries, not a second backlog or an implementation commitment. Delivery issues own acceptance, dependencies and current progress.
 
-1. **Inspect a local task timeline.** Load a documented local event file and synthetic example, inspect source/provenance and handle malformed, repeated or conflicting input. Excludes graph, derived owner, live collection and MCP.
-2. **Trace a task chain.** Add a linked delegation/consultation graph, revisions and received-record waiting summary after the timeline is accepted. Excludes real producer reporting, orchestration and automatic anomaly diagnosis.
+1. **Inspect a local task in D (DAM-30).** Load a bundled synthetic example through the real importer, trace source-linked delegation/consultation, attempts and explicit checks, inspect timeline/source/receipts and import independent diagnostic files. Excludes derived owner/waiting summaries, live collection and MCP. DAM-35 projection and DAM-36 presentation are sequential technical outputs under this first result.
+2. **Summarize received-record waiting (residual DAM-31).** After actual DAM-30 acceptance, compute scoped open blocks, explicit next-actor candidates and ambiguity from the delivered relation projection. No live-state inference, real producer, orchestration or automatic anomaly diagnosis.
 3. **Receive one local producer's reports.** Exercise a real documented client boundary with safe synthetic content, receipt/error feedback, retry identity and persistence across restart, then inspect the same events. Fixtures alone cannot establish this result.
 
 Product recommendation: evaluate local input/view before adding MCP. Tech Lead must explicitly choose the transport, assess the size of the third result and decide whether a generic MCP adapter and reusable reporting skill fit it or need a separate later release. No technical implementation is selected here. Factory-specific integration should occur only after the independent tool is built, tested and usable through its public instructions.

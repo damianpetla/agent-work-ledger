@@ -1,6 +1,6 @@
 # Agent Work Ledger
 
-Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. Independent review, integrated QA and user evaluation remain separate acceptance gates. There is no live agent connection, backend or durable history.
+Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. DAM-30 is accepted at `9656cc61e51d804b6e63f9518deaf1ce06171489`. This revision finalizes the DAM-32 local MCP/persistence contract and dependencies; there is no implemented backend or durable history yet. [Local MCP support/setup](docs/local-service.md) distinguishes verified dependency probes from future product commands, and [service contract v1](docs/ledger-api.md) defines the next implementation.
 
 ## Run locally
 
@@ -50,3 +50,7 @@ AWL_TEST_ORIGIN=http://127.0.0.1:8774 AWL_TEST_CHROMIUM=/path/to/isolated/chromi
 [Working-D author evidence](web/tests/workspace/evidence.md) records versions, actual checks, first failures, bounds, screenshots, build hashes and limitations. These author results do not replace independent review/QA or the user trial. [Product brief](docs/product-brief.md) and [technical plan](docs/technical-plan.md) describe current scope and deferred results.
 
 Licensed under [MIT](LICENSE).
+
+## Next implementation: local MCP and durable sessions
+
+DAM-32 adds public local installation, explicit project and whole-task session registration, real Streamable HTTP MCP reporting to shared SQLite storage, and ordinary D reads of exact events/first receipts after restart. [Architecture and evidence boundary](docs/architecture.md) and [technical plan](docs/technical-plan.md) define ownership and independent QA/user trial. The pinned Python and Inspector locks can be installed now for dependency checks; the Ledger service/package remains unimplemented at this contract revision. Self-hosted packaging/security is later DAM-39, richer day browsing DAM-40. Studio integration and actual VPS deployment are excluded.

@@ -1,0 +1,5 @@
+# DAM-32 direct runtime/client dependencies; resolved on Python 3.12.0.
+mcp==2.3.0
+starlette==1.10.0
+uvicorn==0.54.0
+httpx2==2.16.0

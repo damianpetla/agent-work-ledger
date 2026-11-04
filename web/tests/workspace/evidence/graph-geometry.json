@@ -1,0 +1,47 @@
+[
+  {
+    "name": "startup1440",
+    "bad": [],
+    "minEdge": 19.81252167675946,
+    "minLabel": 15.835917704814188,
+    "maxHeight": 151.9999076224662,
+    "zoom": 0.925,
+    "count": 9
+  },
+  {
+    "name": "branch-cycle",
+    "bad": [],
+    "minEdge": 23.999984071061416,
+    "minLabel": 36.43746040962838,
+    "maxHeight": 148.00002639358107,
+    "zoom": 0.925,
+    "count": 14
+  },
+  {
+    "name": "references",
+    "bad": [],
+    "minEdge": 23.99990571511758,
+    "minLabel": 20.60049276158059,
+    "maxHeight": 152.00010557432432,
+    "zoom": 0.925,
+    "count": 25
+  },
+  {
+    "name": "long1280",
+    "bad": [],
+    "minEdge": 52.00001922813622,
+    "minLabel": 15.83595069679054,
+    "maxHeight": 695.0000659839527,
+    "zoom": 0.925,
+    "count": 7
+  },
+  {
+    "name": "long200",
+    "bad": [],
+    "minEdge": 71.23371367879568,
+    "minLabel": 16.67190139358108,
+    "maxHeight": 2529.999736064189,
+    "zoom": 0.925,
+    "count": 7
+  }
+]

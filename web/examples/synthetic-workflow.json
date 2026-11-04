@@ -1,0 +1,215 @@
+{
+  "formatVersion": 1,
+  "events": [
+    {
+      "eventId": "example:01.assign",
+      "taskId": "example:export-dates",
+      "actorId": "example:director",
+      "actorLabel": "Director",
+      "roleLabel": "Director",
+      "runId": "example:work",
+      "attemptId": "example:v1",
+      "kind": "assignment",
+      "occurredAt": "2026-11-04T09:12:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "example:director",
+        "toActorId": "example:developer",
+        "parentRunId": null
+      }
+    },
+    {
+      "eventId": "example:02.runtime",
+      "taskId": "example:export-dates",
+      "actorId": "example:developer",
+      "actorLabel": "Developer",
+      "roleLabel": "Developer",
+      "runId": "example:work",
+      "attemptId": null,
+      "kind": "runtime",
+      "occurredAt": "2026-11-04T09:15:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "configured": {
+          "model": "example-model",
+          "effort": "medium"
+        },
+        "verified": {
+          "model": null,
+          "effort": null
+        },
+        "verification": null
+      }
+    },
+    {
+      "eventId": "example:03.to-qa",
+      "taskId": "example:export-dates",
+      "actorId": "example:developer",
+      "actorLabel": "Developer",
+      "roleLabel": "Developer",
+      "runId": "example:work",
+      "attemptId": "example:v1",
+      "kind": "handoff",
+      "occurredAt": "2026-11-04T09:18:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "example:qa",
+        "reason": "Check the export date boundary on v1."
+      }
+    },
+    {
+      "eventId": "example:04.qa-v1",
+      "taskId": "example:export-dates",
+      "actorId": "example:qa",
+      "actorLabel": "QA",
+      "roleLabel": "QA",
+      "runId": "example:checks",
+      "attemptId": null,
+      "kind": "qa",
+      "occurredAt": "2026-11-04T09:21:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "targetAttemptId": "example:v1",
+        "outcome": "failed",
+        "summary": "Brzuszek export shifts a date at the UTC boundary."
+      }
+    },
+    {
+      "eventId": "example:05.return",
+      "taskId": "example:export-dates",
+      "actorId": "example:qa",
+      "actorLabel": "QA",
+      "roleLabel": "QA",
+      "runId": "example:work",
+      "attemptId": "example:v1",
+      "kind": "handoff",
+      "occurredAt": "2026-11-04T09:24:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "example:developer",
+        "reason": "Return v1 for a date-boundary correction. This names an actor, not a future attempt."
+      }
+    },
+    {
+      "eventId": "example:06.revision",
+      "taskId": "example:export-dates",
+      "actorId": "example:developer",
+      "actorLabel": "Developer",
+      "roleLabel": "Developer",
+      "runId": "example:work",
+      "attemptId": "example:v2",
+      "kind": "revision",
+      "occurredAt": "2026-11-04T09:27:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "previousAttemptId": "example:v1",
+        "reason": "Use an explicit UTC boundary for the revised export."
+      }
+    },
+    {
+      "eventId": "example:07.recheck",
+      "taskId": "example:export-dates",
+      "actorId": "example:developer",
+      "actorLabel": "Developer",
+      "roleLabel": "Developer",
+      "runId": "example:work",
+      "attemptId": "example:v2",
+      "kind": "handoff",
+      "occurredAt": "2026-11-04T09:30:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "example:qa",
+        "reason": "Recheck revised v2; previous QA does not apply."
+      }
+    },
+    {
+      "eventId": "example:08.qa-v2",
+      "taskId": "example:export-dates",
+      "actorId": "example:qa",
+      "actorLabel": "QA",
+      "roleLabel": "QA",
+      "runId": "example:checks",
+      "attemptId": null,
+      "kind": "qa",
+      "occurredAt": "2026-11-04T09:33:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "targetAttemptId": "example:v2",
+        "outcome": "passed",
+        "summary": "Date-boundary check passed on v2, as reported by QA."
+      }
+    },
+    {
+      "eventId": "example:09.user-review",
+      "taskId": "example:export-dates",
+      "actorId": "example:qa",
+      "actorLabel": "QA",
+      "roleLabel": "QA",
+      "runId": "example:work",
+      "attemptId": "example:v2",
+      "kind": "handoff",
+      "occurredAt": "2026-11-04T09:36:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "example:director",
+        "reason": "User review requested for v2. User acceptance is not recorded."
+      }
+    },
+    {
+      "eventId": "example:10.advice",
+      "taskId": "example:export-dates",
+      "actorId": "example:director",
+      "actorLabel": "Director",
+      "roleLabel": "Director",
+      "runId": null,
+      "attemptId": null,
+      "kind": "consultation",
+      "occurredAt": "2026-11-04T09:39:00.000Z",
+      "source": {
+        "producerId": "example:public",
+        "label": "Synthetic Brzuszek export diagnosis \u2014 invented records",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "example:developer",
+        "question": "Advice only: keep occurrence and import times separate."
+      }
+    }
+  ]
+}

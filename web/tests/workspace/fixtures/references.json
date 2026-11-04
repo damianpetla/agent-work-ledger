@@ -1,0 +1,108 @@
+{
+  "formatVersion": 1,
+  "events": [
+    {
+      "eventId": "r:assign",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:r1",
+      "attemptId": "field:a1",
+      "kind": "assignment",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "field:sender",
+        "toActorId": "field:writer",
+        "parentRunId": null
+      }
+    },
+    {
+      "eventId": "r:foreign",
+      "taskId": "foreign:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:r1",
+      "attemptId": "field:a1",
+      "kind": "assignment",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "foreign:sender",
+        "toActorId": "foreign:other",
+        "parentRunId": null
+      }
+    },
+    {
+      "eventId": "r:missing",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:check",
+      "attemptId": null,
+      "kind": "qa",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "targetAttemptId": "unknown:attempt",
+        "outcome": "unknown",
+        "summary": "Unknown target must remain unresolved"
+      }
+    },
+    {
+      "eventId": "r:cross",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:check",
+      "attemptId": null,
+      "kind": "qa",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "targetAttemptId": "foreign:a",
+        "outcome": "passed",
+        "summary": "Wrong task reference, not a valid pass"
+      }
+    },
+    {
+      "eventId": "r:elsewhere",
+      "taskId": "foreign:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "foreign:r",
+      "attemptId": "foreign:a",
+      "kind": "completion",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "summary": "Foreign attempt source"
+      }
+    }
+  ]
+}

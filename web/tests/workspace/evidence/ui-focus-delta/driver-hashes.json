@@ -1,0 +1,6 @@
+{
+  "path": "web/tests/ui/check.mjs",
+  "base": "22c26e095679b3436b6647b6b4be299f808f78d4",
+  "beforeSha256": "4f8a2b805af8c0b14c50c0c8e70080bee7af965abfa2efefb998aad5f7fe663a",
+  "afterSha256": "6fbe4263a7421574f0b179c5d324671b73c164f80d86caea39ae72e6bc981b79"
+}

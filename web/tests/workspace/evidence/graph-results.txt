@@ -1,0 +1,11 @@
+PASS real startup import, distinct attempts/checks, actual receipt and source-complete disclosures
+PASS 1440 real pointer text/padding, stationary node/source/Close/Return and pan/zoom
+PASS 1280 real pointer text/padding, stationary node/source/Close/Return and pan/zoom
+PASS 777 real pointer text/padding, stationary node/source/Close/Return and pan/zoom
+PASS multi-source entity is not canonical JSON; revision, QA v2, runtime and explicit edge source
+PASS distinct imported topology, cached Example receipts, failed import keeps graph and selected source
+PASS arbitrary branch/cycle/disconnected topology and cross-task diagnostic source lookup
+PASS 128-char IDs, long role, 500-code-point summary and 200% graph text natural heights
+PASS startup network and validation errors show actionable failure with no fabricated graph
+PASS no storage writes, remote assets or uncaught application errors
+TOTAL 10 PASS 10 FAIL 0 SKIP 0

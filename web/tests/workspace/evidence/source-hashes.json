@@ -1,0 +1,21 @@
+{
+  "graph-ui/build.mjs": "fbf1d6b677af24f4b367225980173dc2b54116a58a2d816f253648f5d86b3b6d",
+  "graph-ui/package-lock.json": "ba20e193224172ad4ce6bacfc4c0d0e81d210a08d0d51517d766006b317f6e84",
+  "graph-ui/package.json": "6c688a38bed3e49bc6d9a5cc637e2cef9f944bfda30fe9d8f78c61cb6730e5a6",
+  "graph-ui/src/Graph.jsx": "71e699d55ae287d6e124ccc9ebe8c6681b8c9b7ef5bda774b228a1f80db49ee0",
+  "graph-ui/src/index.jsx": "5a0dea2d9e3f5499a10019404df87b0bf8ed7332f5401fc6a3f8e0dc51326835",
+  "graph-ui/src/layout.js": "3da59bc58eed282effd89a09be1f4465b14050244fdc7fb28c9e26f05ba6e5bc",
+  "graph-ui/src/style.css": "1149db5ead38344c9d94ff4249fbb99da41f3dc5c056c98d216f018b6b99aa39",
+  "web/app.js": "8ab32cb4b63c3836e1f7adc9bd24a66e360910778928374612f88132e3ca59f2",
+  "web/examples/synthetic-workflow.json": "aaf54e8ab9ad7bbf98dafac8e05c2313e3dc5b8f3c3b7cf259845a12b3715bcc",
+  "web/graph-ui/THIRD-PARTY-LICENSES.txt": "7e3e6a06af72c3b4d9c758776c97cf919962df93f890b3dea15fbdd015fa6bdb",
+  "web/graph-ui/graph.css": "32abc9e1c3de7ac8dfbf494f624912f87c587670b80b2b7314e942bb1e824f4d",
+  "web/graph-ui/graph.js": "aa7b93813c28d8f43d18994cbb6ce60f5c98c98a06fe9ee2339f3b406f4d771e",
+  "web/graph-ui/graph.js.LEGAL.txt": "500c5424b9ccd8d9a62faa1b7e49341a3e7371f132471e65236c76db3b20cf46",
+  "web/index.html": "768ede6cab051709c1420873a5394a620f4aba0cba4960e3082f7502719b4ad2",
+  "web/tests/ui/check.mjs": "4f8a2b805af8c0b14c50c0c8e70080bee7af965abfa2efefb998aad5f7fe663a",
+  "web/tests/workspace/browser.mjs": "f557bbe87cea4b4e1e142909777e0b7dd265c5c46e55ec183243cc42c3548194",
+  "web/tests/workspace/check.mjs": "60e2f4e8a86519a23e6667ecf5794893d108e2f0b1efaf33281d406cd0ce95c2",
+  "web/ui/display.js": "768e4669c70b71d8da6c4912a37a145573291aaffb97180891688d8c519debae",
+  "web/ui/workspaces.js": "4079c713bd411e8cf7061c3ebfaa84803d3940eb2588620b3b76f692a9b2ca25"
+}

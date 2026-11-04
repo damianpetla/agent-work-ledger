@@ -1,47 +1,52 @@
 # Agent Work Ledger
 
-A local-first diagnostic tool for agent work. Import structured event files, follow a task's timeline and inspect the source behind every report—without an AI service or an external account.
-
-The local file timeline is implemented. Independent review, integrated QA and the first user evaluation are separate acceptance gates. Graphs, persistent storage and real producer reporting are later results; there is no event collector or live agent connection.
+Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. Independent review, integrated QA and user evaluation remain separate acceptance gates. There is no live agent connection, backend or durable history.
 
 ## Run locally
 
-Requires CPython **3.12** and a desktop Chromium browser. The author checked Python **3.12.0**, Chromium **156.0.8078.4**, macOS **26.6.2 arm64**. Other platforms/browser versions are not yet verified. No package installation, build, framework or CDN is needed.
-
-From the repository root:
+Requires CPython **3.12** and desktop Chromium. Serve only public assets:
 
 ```sh
 python3.12 -m http.server 8774 --bind 127.0.0.1 --directory web
 ```
 
-Open [the local timeline](http://127.0.0.1:8774/). Keep the terminal running; stop the dedicated server with **Ctrl-C**. Serve only `web`, never the repository root. This loopback static server is for local inspection, not production hosting. Do not open `index.html` directly as a `file://` URL; ES modules need the local server.
+Open [Agent Work Ledger](http://127.0.0.1:8774/). Stop the dedicated server with **Ctrl-C**. Choose a free port if 8774 is already in use. Do not serve the repository root or open the app as `file://`. This loopback server is for local inspection, not production hosting. Viewing committed assets needs no npm installation or build. Author environment: Python 3.12.0, Chromium 156.0.8078.4, macOS 26.6.2 arm64; other targets are unverified.
 
-## Try the synthetic example
+## Try the working graph
 
-1. In the app, choose **Download the synthetic example**, then use **Choose a local event file** to select the downloaded JSON. Alternatively, select `web/examples/synthetic-timeline.json` directly from this checkout. The example uses the ordinary import path and is never loaded automatically.
-2. Select task **demo:launch**. Find the assignment from **demo:coordinator → demo:builder**, the separate consultation to **demo:advisor**, and the reported block **Waiting for an example input specification.**
-3. Find the runtime report: configured model **example-model**, configured effort **medium**; verified runtime model and effort **unknown**. Configured values do not establish what actually ran.
-4. Activate **Inspect source** for any event. The inspector shows its exact parsed producer JSON, source/synthetic labels, run/attempt references and a separate ledger receipt. Keyboard users can Tab to an inspection button and press Enter; focus moves to the inspector. **Return to selected event** moves it back.
-5. Compare **Occurred** (producer-reported) with **Imported** (local acceptance). The handoff has unknown occurrence time and sorts last. Select **demo:other-task** to see the independent task.
-6. Choose the same file again: **0 new, 6 duplicate events**, with first receipt IDs/times retained. After the example, selecting `web/tests/import/malformed.json` or `web/tests/import/conflict.json` produces an actionable error and preserves the previous workspace.
-7. Reload the page: the workspace is empty. Choose the original example again to reconstruct its records.
+1. **Example** starts with [ten invented workflow records](web/examples/synthetic-workflow.json), fetched locally as bytes and validated by the ordinary importer. Find separate attempts `example:v1` and `example:v2`, failed QA targeting only v1, the explicit v1→v2 revision, and passed QA targeting only v2. Handoffs end at named actors; QA is not connected to a later revision by guesswork. The final report requests user review, without asserting acceptance.
+2. Click card text or padding. Check cards open their accepted producer JSON and separate **current-tab ledger receipt**. An actor/run/attempt supported by several events first shows projected facts and **all named supporting records**; select the source you want. Projections are not exact producer JSON. Open, Close and Return keep graph x/y/zoom unchanged. Return restores the invoking control's focus. Keyboard users can Tab to native buttons and press Enter.
+3. Use explicit pan, Zoom in/out and Fit to explore. Arrow keys pan a focused canvas. The graph is read-only. A new task/workspace receives one measured initial orientation; long content or other topologies may require panning. Cards wrap and grow rather than shrinking their text. No universal graph-routing or mobile/accessibility certification is claimed.
+4. **Other evidence** exposes runtime and other reports; **All records** is the complete occurrence-ordered timeline; **Entities and relations** includes context, internal and disconnected entities and every literal relation. Diagnostics expose unresolved, invalid, ambiguous and cyclic references with their exact sources. Advice is not assignment. A check applies only to its named attempt; a later attempt inherits no pass.
+5. Choose **Imported files** and open [the independent six-record example](web/examples/synthetic-timeline.json) through the native file chooser. It produces a different graph and two actual task IDs, including `demo:other-task`. This workspace starts empty and later file imports accumulate there. Repeating the same file gives 0 new / 6 duplicate events and preserves first receipts. Malformed, conflicting and unreadable files preserve the prior imported graph/source. The built-in Example stays separate and retains its current-tab receipts when reopened.
+6. Inspect runtime reports: configured settings are separate from reported runtime verification, and unknown remains unknown. Receipt confirms local acceptance only, never producer truth, independence or completion. Reload resets imported data and recreates the example with new current-tab receipts; keep original files for reconstruction. Startup fetch/validation failure shows an actionable error and leaves manual import available, rather than displaying a fallback graph.
 
-![Synthetic task timeline and source inspector](web/tests/ui/timeline.png)
+V1 has task IDs but no registered project, session, day or work-title fields. The task directory uses actual accepted IDs. Familiar names inside synthetic records are labels only. There is no inferred owner/waiting summary, cost calculation, real producer, collector, project history or factory integration.
 
-These are suggested evaluation steps, not a completed user trial. The synthetic example demonstrates interpretation, not real agent reporting.
+## Input and privacy
 
-## Input and trust boundary
+Files are UTF-8 v1 JSON envelopes limited to **1 MiB (1,048,576 encoded bytes)** and **1,000 event occurrences per import**. The unchanged [event contract](docs/event-contract.md) and [import API](docs/import-api.md) define identity, strict decoding, atomic validation, duplicate/conflict handling, ordering and receipts. Event content is a producer declaration. The [graph API](docs/graph-api.md) defines explicit evidence relations and diagnostics.
 
-Files are v1 UTF-8 JSON envelopes with at most **1 MiB (1,048,576 encoded bytes)** and **1,000 events per import**, including duplicate occurrences. Invalid UTF-8, a leading BOM, malformed JSON, repeated object keys, unknown fields or conflicting event IDs reject the entire import. The [event contract](docs/event-contract.md) defines exact fields, kinds, IDs, calendar timestamps and nullable values. The app reads file bytes directly and reports validation errors without echoing raw input.
+Data stays in browser memory. No localStorage, IndexedDB, outgoing remote runtime requests or AI analysis is used. Only structured diagnostic metadata belongs here: do not import transcripts, prompts, secrets or private conversation content.
 
-Imports accumulate only in the current tab's memory. Reloading or closing loses the session; keep your original files and import them again. No browser storage, backend, automatic collection, outgoing remote requests or AI analysis is used in ordinary viewing. Imported files stay in the browser. Use structured diagnostic metadata only; do not import secrets, transcripts, prompts or private conversation content.
+## Development and checks
 
-All event content is a **producer declaration**, including reported tool verification. A **ledger receipt** confirms local import only. It does not certify truth, review quality, independence or completion. Unknown stays unknown, multiple runtime reports stay separate, and no live status, current owner or graph is inferred. Occurrence-time ordering is a presentation convention, not proof of causality.
+The pure importer/projector remain dependency-free. The selected D UI uses locally bundled MIT React Flow, Dagre, React and React DOM, with locked dependencies and [third-party notices](web/graph-ui/THIRD-PARTY-LICENSES.txt). No Pro examples or CDN assets are used. Rebuild with Node 23.7.0 / npm 10.9.2 (observed):
 
-## Checks and development
+```sh
+npm ci --prefix graph-ui --ignore-scripts
+npm run build --prefix graph-ui
+node web/tests/graph/check.mjs
+node web/tests/workspace/check.mjs
+```
 
-Open [the browser import checks](http://127.0.0.1:8774/tests/import/) with the same server running; inspect its completed `TOTAL / PASS / FAIL / SKIP` report. The dependency-free module and stable consumer boundary are documented in [import API](docs/import-api.md). [UI author evidence](web/tests/ui/evidence.md) records actual application checks, versions, exact commands, failures/reruns, screenshots and limits. The optional UI runner needs Node 22+ with built-in WebSocket and an explicitly selected isolated Chromium executable; neither is required to run the app.
+Open [browser importer checks](http://127.0.0.1:8774/tests/import/) using the same server. Optional Node/CDP runners use an explicitly selected isolated Chromium executable, never the user's private browser:
 
-The [product brief](docs/product-brief.md) explains purpose and trust boundaries; the [technical plan](docs/technical-plan.md) describes the local slices and later verification. Agent Work Ledger is independent of any software factory, role taxonomy, tracker or agent provider.
+```sh
+AWL_TEST_ORIGIN=http://127.0.0.1:8774 AWL_TEST_CHROMIUM=/path/to/isolated/chromium AWL_TEST_OUTPUT=/tmp/awl-ui node web/tests/ui/check.mjs
+AWL_TEST_ORIGIN=http://127.0.0.1:8774 AWL_TEST_CHROMIUM=/path/to/isolated/chromium AWL_TEST_OUTPUT=/tmp/awl-graph node web/tests/workspace/browser.mjs
+```
+
+[Working-D author evidence](web/tests/workspace/evidence.md) records versions, actual checks, first failures, bounds, screenshots, build hashes and limitations. These author results do not replace independent review/QA or the user trial. [Product brief](docs/product-brief.md) and [technical plan](docs/technical-plan.md) describe current scope and deferred results.
 
 Licensed under [MIT](LICENSE).

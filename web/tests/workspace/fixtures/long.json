@@ -1,0 +1,47 @@
+{
+  "formatVersion": 1,
+  "events": [
+    {
+      "eventId": "long:assign",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "long:run",
+      "attemptId": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+      "kind": "assignment",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "field:sender",
+        "toActorId": "field:writer",
+        "parentRunId": null
+      }
+    },
+    {
+      "eventId": "long:check",
+      "taskId": "field:task",
+      "actorId": "field:assessor",
+      "actorLabel": "Product Analyst / Internationalization specialist",
+      "roleLabel": "Field checker",
+      "runId": "long:checks",
+      "attemptId": null,
+      "kind": "qa",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "targetAttemptId": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+        "outcome": "failed",
+        "summary": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Correct the export date boundary when the device timezone changes during an overnight session. XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Correct the export date boundary when the device timezone changes during an overnight session. XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      }
+    }
+  ]
+}

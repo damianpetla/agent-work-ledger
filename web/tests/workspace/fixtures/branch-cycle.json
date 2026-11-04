@@ -1,0 +1,134 @@
+{
+  "formatVersion": 1,
+  "events": [
+    {
+      "eventId": "f:root",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:r1",
+      "attemptId": "field:a1",
+      "kind": "assignment",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "field:sender",
+        "toActorId": "field:writer",
+        "parentRunId": "field:r2"
+      }
+    },
+    {
+      "eventId": "f:branch",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:r2",
+      "attemptId": "field:b1",
+      "kind": "assignment",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "field:sender",
+        "toActorId": "field:reader",
+        "parentRunId": "field:r1"
+      }
+    },
+    {
+      "eventId": "f:branch2",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:r3",
+      "attemptId": "field:c1",
+      "kind": "assignment",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "field:sender",
+        "toActorId": "field:third",
+        "parentRunId": "field:r1"
+      }
+    },
+    {
+      "eventId": "f:advice",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": null,
+      "attemptId": null,
+      "kind": "consultation",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "field:advisor",
+        "question": "Independent advice only"
+      }
+    },
+    {
+      "eventId": "f:runtime",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:isolated",
+      "attemptId": null,
+      "kind": "runtime",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "configured": {
+          "model": "declared",
+          "effort": null
+        },
+        "verified": {
+          "model": null,
+          "effort": null
+        },
+        "verification": null
+      }
+    },
+    {
+      "eventId": "f:done",
+      "taskId": "field:task",
+      "actorId": "field:sender",
+      "actorLabel": "Field coordinator",
+      "roleLabel": "Navigator",
+      "runId": "field:island",
+      "attemptId": "field:island-a",
+      "kind": "completion",
+      "occurredAt": null,
+      "source": {
+        "producerId": "field:fixture",
+        "label": "Synthetic independent UI fixture",
+        "synthetic": true
+      },
+      "data": {
+        "summary": "A disconnected completion declaration"
+      }
+    }
+  ]
+}

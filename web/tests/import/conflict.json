@@ -1,0 +1,45 @@
+{
+  "formatVersion": 1,
+  "events": [
+    {
+      "eventId": "demo:new",
+      "taskId": "demo:launch",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:build",
+      "attemptId": "demo:v1",
+      "kind": "completion",
+      "occurredAt": "2026-11-04T10:00:00.000Z",
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "summary": "Must not survive rejected batch."
+      }
+    },
+    {
+      "eventId": "demo:01",
+      "taskId": "demo:launch",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:build",
+      "attemptId": "demo:v1",
+      "kind": "assignment",
+      "occurredAt": "2026-11-04T10:00:00.000Z",
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "demo:coordinator",
+        "toActorId": "demo:different",
+        "parentRunId": null
+      }
+    }
+  ]
+}

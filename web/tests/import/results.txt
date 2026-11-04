@@ -1,0 +1,169 @@
+PASS valid file accepts event with separate ledger receipt
+PASS nested escaped-equivalent duplicate keys reject without touching previous state
+PASS retry preserves first receipt and conflicting batch rejects atomically
+PASS invalid calendar rejects entire batch with event index and field
+PASS raw UTF-8 rejects invalid byte sequence and leading BOM explicitly
+PASS malformed JSON ""
+PASS malformed JSON "{"
+PASS malformed JSON "null trailing"
+PASS malformed JSON "[1,]"
+PASS malformed JSON "{\"a\":1,}"
+PASS malformed JSON "{\"a\" 1}"
+PASS malformed JSON "{\"a\":}"
+PASS malformed JSON "{\"a\":01}"
+PASS malformed JSON "{\"a\":+1}"
+PASS malformed JSON "{\"a\":NaN}"
+PASS malformed JSON "{\"a\":Infinity}"
+PASS malformed JSON "{\"a\":1e999}"
+PASS malformed JSON "{\"a\":\"\\q\"}"
+PASS malformed JSON "{\"a\":\"unterminated}"
+PASS malformed JSON "{\"a\":\"line\nfeed\"}"
+PASS malformed JSON "true false"
+PASS malformed JSON "\u000b{}"
+PASS malformed JSON "{\"formatVersion\":1,\"events\":[]}x"
+PASS duplicate keys rejected at every raw object boundary {"formatVersion":1,"formatVers
+PASS duplicate keys rejected at every raw object boundary {"formatVersion":1,"events":[]
+PASS duplicate keys rejected at every raw object boundary {"formatVersion":1,"events":[{
+PASS duplicate keys rejected at every raw object boundary {"__proto__":{},"__proto__":{}
+PASS malformed multiline JSON has line/column location without raw text
+PASS invalid envelope null
+PASS invalid envelope []
+PASS invalid envelope 1
+PASS invalid envelope true
+PASS invalid envelope "envelope"
+PASS invalid envelope {}
+PASS invalid envelope {"formatVersion":1}
+PASS invalid envelope {"formatVersion":1,"events":{}}
+PASS invalid envelope {"formatVersion":1,"events":[],"extra":1}
+PASS unsupported version 0
+PASS unsupported version 2
+PASS unsupported version 1
+PASS unsupported version null
+PASS unsupported version true
+PASS required event field eventId
+PASS required event field taskId
+PASS required event field actorId
+PASS required event field actorLabel
+PASS required event field roleLabel
+PASS required event field runId
+PASS required event field attemptId
+PASS required event field kind
+PASS required event field occurredAt
+PASS required event field source
+PASS required event field data
+PASS unknown event field
+PASS unknown kind
+PASS invalid source type
+PASS required source field producerId
+PASS required source field label
+PASS required source field synthetic
+PASS unknown source field
+PASS synthetic must be boolean
+PASS invalid ID ""
+PASS invalid ID "space id"
+PASS invalid ID "é"
+PASS invalid ID "x/y"
+PASS invalid ID "x\n"
+PASS invalid ID "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+PASS invalid ID 42
+PASS invalid ID null
+PASS 128 ASCII ID characters accepted case-sensitive
+PASS display text rejects
+PASS display text rejects 42
+PASS display text rejects aaaaaaaaaaaaaaaaaaaa
+PASS display text rejects 😀😀😀😀😀😀😀😀😀😀
+PASS 500 Unicode code points and literal HTML remain exact text
+PASS invalid timestamp 2026-02-29T00:00:00.000Z
+PASS invalid timestamp 2026-04-31T00:00:00.000Z
+PASS invalid timestamp 2026-13-01T00:00:00.000Z
+PASS invalid timestamp 2026-01-01T24:00:00.000Z
+PASS invalid timestamp 2026-01-01T00:00:60.000Z
+PASS invalid timestamp 2026-01-01T00:00:00Z
+PASS invalid timestamp 2026-01-01T00:00:00.000+00:00
+PASS invalid timestamp 42
+PASS valid timestamp 2024-02-29T23:59:59.999Z
+PASS valid timestamp 2000-02-29T00:00:00.000Z
+PASS valid timestamp 0000-01-01T00:00:00.000Z
+PASS valid timestamp null
+PASS attempt needs run
+PASS completion requires attempt
+PASS unknown payload member
+PASS payload must be object
+PASS within-batch equal duplicates counted and conflicting duplicates reject
+PASS equality includes exact strings, nulls and every producer field
+PASS reordered producer objects, whitespace and equivalent JSON escapes remain identical
+PASS empty import succeeds without clock or receipt generator
+PASS receipt failures return atomic error and immutable snapshots resist caller writes
+PASS byte decoder rejects malformed UTF-8 variants and byte BOM
+PASS 1 MiB exact encoded boundary accepted and one extra byte rejected
+PASS 1,000-event limit counts incoming occurrences including duplicates
+PASS 1,000 unique events accepted with one receipt each
+PASS hostile nesting returns structured rejection
+PASS raw public APIs reject parsed objects and wrong byte types
+PASS public synthetic file uses ordinary raw import and independently expected projection
+PASS golden conflict and malformed files preserve prior synthetic snapshot
+PASS golden out-of-order file and shuffled separate imports share canonical timeline
+PASS ASCII ties, null-last order and task filtering
+PASS all ten v1 kinds plus reported tool verification accepted
+PASS required assignment.data.fromActorId (demo:01)
+PASS required assignment.data.toActorId (demo:01)
+PASS required assignment.data.parentRunId (demo:01)
+PASS unknown assignment payload field (demo:01)
+PASS required consultation.data.toActorId (demo:02)
+PASS required consultation.data.question (demo:02)
+PASS unknown consultation payload field (demo:02)
+PASS required block.data.reason (demo:04)
+PASS required block.data.nextActorId (demo:04)
+PASS unknown block payload field (demo:04)
+PASS required resolution.data.blockEventId (demo:resolution)
+PASS unknown resolution payload field (demo:resolution)
+PASS required handoff.data.toActorId (demo:05)
+PASS required handoff.data.reason (demo:05)
+PASS unknown handoff payload field (demo:05)
+PASS required revision.data.previousAttemptId (demo:revision)
+PASS required revision.data.reason (demo:revision)
+PASS unknown revision payload field (demo:revision)
+PASS required review.data.targetAttemptId (demo:review)
+PASS required review.data.outcome (demo:review)
+PASS required review.data.summary (demo:review)
+PASS unknown review payload field (demo:review)
+PASS required qa.data.targetAttemptId (demo:qa)
+PASS required qa.data.outcome (demo:qa)
+PASS required qa.data.summary (demo:qa)
+PASS unknown qa payload field (demo:qa)
+PASS required completion.data.summary (demo:other)
+PASS unknown completion payload field (demo:other)
+PASS required runtime.data.configured (demo:03)
+PASS required runtime.data.verified (demo:03)
+PASS required runtime.data.verification (demo:03)
+PASS unknown runtime payload field (demo:03)
+PASS required runtime.data.configured (demo:verified)
+PASS required runtime.data.verified (demo:verified)
+PASS required runtime.data.verification (demo:verified)
+PASS unknown runtime payload field (demo:verified)
+PASS assignment requires run
+PASS block requires run
+PASS resolution requires run
+PASS handoff requires run
+PASS revision requires run
+PASS review requires run
+PASS qa requires run
+PASS completion requires run
+PASS runtime requires run
+PASS kind-specific attempt requirements and nullable review/runtime attempts
+PASS nullable consultation run/attempt and nullable labels accepted
+PASS runtime configured.model required nullable
+PASS runtime configured.effort required nullable
+PASS runtime verified.model required nullable
+PASS runtime verified.effort required nullable
+PASS runtime configured exact fields
+PASS runtime verified exact fields
+PASS reported verification requires method
+PASS reported verification requires verifierActorId
+PASS reported verification requires evidenceRef
+PASS reported verification requires summary
+PASS runtime known values require tool basis; all unknown require null
+PASS revision self reference is a schema error; unresolved foreign references remain accepted
+PASS review outcome constrained
+PASS qa outcome constrained
+TOTAL 168 PASS 168 FAIL 0 SKIP 0

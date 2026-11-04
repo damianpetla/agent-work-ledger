@@ -1,0 +1,132 @@
+{
+  "formatVersion": 1,
+  "events": [
+    {
+      "eventId": "demo:04",
+      "taskId": "demo:launch",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:build",
+      "attemptId": "demo:v1",
+      "kind": "block",
+      "occurredAt": "2026-11-04T10:03:00.000Z",
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "reason": "Waiting for an example input specification.",
+        "nextActorId": "demo:coordinator"
+      }
+    },
+    {
+      "eventId": "demo:03",
+      "taskId": "demo:launch",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:build",
+      "attemptId": "demo:v1",
+      "kind": "runtime",
+      "occurredAt": "2026-11-04T10:02:00.000Z",
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "configured": {
+          "model": "example-model",
+          "effort": "medium"
+        },
+        "verified": {
+          "model": null,
+          "effort": null
+        },
+        "verification": null
+      }
+    },
+    {
+      "eventId": "demo:05",
+      "taskId": "demo:launch",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:build",
+      "attemptId": "demo:v1",
+      "kind": "handoff",
+      "occurredAt": null,
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "demo:coordinator",
+        "reason": "Please supply the missing example."
+      }
+    },
+    {
+      "eventId": "demo:01",
+      "taskId": "demo:launch",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:build",
+      "attemptId": "demo:v1",
+      "kind": "assignment",
+      "occurredAt": "2026-11-04T10:00:00.000Z",
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "fromActorId": "demo:coordinator",
+        "toActorId": "demo:builder",
+        "parentRunId": null
+      }
+    },
+    {
+      "eventId": "demo:other",
+      "taskId": "demo:other-task",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:other-run",
+      "attemptId": "demo:other-v1",
+      "kind": "completion",
+      "occurredAt": "2026-11-04T10:00:00.000Z",
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "summary": "Separate synthetic task report."
+      }
+    },
+    {
+      "eventId": "demo:02",
+      "taskId": "demo:launch",
+      "actorId": "demo:coordinator",
+      "actorLabel": "Coordinator",
+      "roleLabel": "Planner",
+      "runId": "demo:build",
+      "attemptId": "demo:v1",
+      "kind": "consultation",
+      "occurredAt": "2026-11-04T10:01:00.000Z",
+      "source": {
+        "producerId": "demo:fixture",
+        "label": "Synthetic local example",
+        "synthetic": true
+      },
+      "data": {
+        "toActorId": "demo:advisor",
+        "question": "Confirm the public interface naming."
+      }
+    }
+  ]
+}

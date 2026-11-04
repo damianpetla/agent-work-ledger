@@ -71,8 +71,52 @@ try {
  const transform=()=>evaluate(`document.querySelector('.react-flow__viewport').style.transform`);
  async function exact(id){await wait(`document.querySelector('.source-id')?.textContent===${JSON.stringify(id)}`);const row=await evaluate(`[...document.querySelectorAll('.raw-record pre')].map(n=>JSON.parse(n.textContent))`);assert.deepEqual(row[0],eventMap.get(id));assert.deepEqual(row[1],receiptMap.get(id));assert.equal(row[1].channel,'mcp');return row}
  async function shot(name){const result=await command('Page.captureScreenshot',{format:'png'});await writeFile(join(output,name+'.png'),Buffer.from(result.data,'base64'))}
+ async function refreshInspectionRegression(){
+  await open();
+  let number=1;while(oracle.data.projects.some(p=>p.projectId===`refresh${number}:project`))number++;
+  const prefix=`refresh${number}`,runId=prefix+':run',taskId=prefix+':task',sessionId=prefix+':session';
+  async function call(tool,args){const path=join(output,'refresh.args.json');await writeFile(path,JSON.stringify(args),{mode:0o600});const result=await new Promise((resolve,reject)=>{const child=spawn(python,['-m','agent_work_ledger.report','sdk','--token-file',tokenFile,'--port',new URL(origin).port,'--tool',tool,'--args-file',path],{cwd:tmpdir(),env});let out='';child.stdout.on('data',x=>out+=x);child.on('exit',code=>code===0?resolve(JSON.parse(out)):reject(Error('SDK append failed')))});assert.equal(result.isError,false)}
+  async function refresh(){await click('#durable-refresh');await wait(`!document.querySelector('#durable-refresh').disabled`);await wait(`document.querySelector('#startup-status').textContent.startsWith('Fresh')`)}
+  const first={eventId:prefix+':e1',taskId,actorId:prefix+':reporter',actorLabel:'Initial reporter',roleLabel:null,runId,attemptId:prefix+':attempt',kind:'assignment',occurredAt:null,source:{producerId:prefix+':producer',label:'Synthetic refresh regression',synthetic:true},data:{fromActorId:prefix+':sender',toActorId:prefix+':worker-a',parentRunId:null}};
+  const second={...first,eventId:prefix+':e2',actorLabel:'Second reporter label',data:{...first.data,toActorId:prefix+':worker-b'}};
+  await call('register_project',{projectId:prefix+':project',name:'Synthetic refresh regression'});
+  await call('register_session',{sessionId,projectId:prefix+':project',taskId,title:'Open inspector update'});
+  await call('append_events',{sessionId,envelopeJson:JSON.stringify({formatVersion:1,events:[first]})});await refresh();
+  await evaluate(`(()=>{const n=document.querySelector('#durable-project');n.value=${JSON.stringify(prefix+':project')};n.dispatchEvent(new Event('change',{bubbles:true}))})()`);await wait(`document.querySelector('#event-count').textContent==='1 event'`);
+  const selector='.graph-card[data-node-id='+JSON.stringify(JSON.stringify(['run',runId]))+']';await align(selector);await click(selector,'padding');
+  const before=await evaluate(`JSON.parse(document.querySelector('.projection-detail pre').textContent)`);assert.equal(before.facts.bindingStatus,'consistent');assert.equal(before.sourceEventIds.length,1);
+  await click('[data-inspector-source="'+first.eventId+'"]');await wait(`document.querySelector('.source-id').textContent===${JSON.stringify(first.eventId)}`);
+  const original=await evaluate(`[...document.querySelectorAll('.raw-record pre')].map(n=>JSON.parse(n.textContent))`),viewport=await transform();
+  await call('append_events',{sessionId,envelopeJson:JSON.stringify({formatVersion:1,events:[second]})});await refresh();
+  const after=await evaluate(`JSON.parse(document.querySelector('.projection-detail pre').textContent)`);
+  await writeFile(join(output,'open-inspector-refresh.json'),JSON.stringify({before,after,original},null,2));
+  assert.equal(after.facts.bindingStatus,'ambiguous','Fresh inspector must adopt the newly ambiguous run binding');
+  assert.deepEqual(after.facts.assignedActorIds,[prefix+':worker-a',prefix+':worker-b']);
+  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[data-inspector-source]')].map(n=>n.dataset.inspectorSource)`),[first.eventId,second.eventId]);
+  assert.match(await text('#diagnostics'),/conflicting_binding/);assert.deepEqual(await evaluate(`[...document.querySelectorAll('.raw-record pre')].map(n=>JSON.parse(n.textContent))`),original);
+  assert.equal(await transform(),viewport,'Refresh retains the open entity viewport');
+  await click('[data-inspector-source="'+second.eventId+'"]');await wait(`document.querySelector('.source-id').textContent===${JSON.stringify(second.eventId)}`);const current=await(await fetch(origin+'/v1/snapshot',{headers:{Authorization:'Bearer '+token}})).json();eventMap.set(second.eventId,second);receiptMap.set(second.eventId,current.data.receipts.find(r=>r.eventId===second.eventId));await exact(second.eventId);
+  await click('.return-button');assert.equal(await evaluate(`document.activeElement===document.querySelector(${JSON.stringify(selector)})`),true,'Nested source Return keeps the entity invoker');await click('.close-source');assert.equal(await transform(),viewport);
+  // The same node identity resolution applies to actors and attempts, not just runs.
+  for(const [kind,id,next] of [['actor',first.actorId,{...second,eventId:prefix+':e3',actorLabel:'Third reporter label'}],['attempt',first.attemptId,{...second,eventId:prefix+':e4'}]]){
+   const target='.graph-card[data-node-id='+JSON.stringify(JSON.stringify([kind,id]))+']';await evaluate(`document.querySelector(${JSON.stringify(target)}).focus({preventScroll:true})`);await key('Enter');await wait(`JSON.parse(document.querySelector('.projection-detail pre').textContent).kind===${JSON.stringify(kind)}`);
+   const beforeCount=await evaluate(`document.querySelectorAll('[data-inspector-source]').length`);
+   await call('append_events',{sessionId,envelopeJson:JSON.stringify({formatVersion:1,events:[next]})});await refresh();
+   assert.equal(await evaluate(`document.querySelectorAll('[data-inspector-source]').length`),beforeCount+1);
+   const facts=await evaluate(`JSON.parse(document.querySelector('.projection-detail pre').textContent)`);assert.equal(facts.kind,kind);assert.ok(facts.sourceEventIds.includes(next.eventId));if(kind==='actor')assert.ok(facts.facts.labels.some(label=>label.actorLabel==='Third reporter label'));
+   await click('.close-source');
+  }
+  // A now-resolved parent relation changes identity; invalidate its obsolete edge panel.
+  const child={...first,eventId:prefix+':child',runId:prefix+':child-run',attemptId:prefix+':child-attempt',data:{...first.data,parentRunId:prefix+':parent-run'}};
+  await call('append_events',{sessionId,envelopeJson:JSON.stringify({formatVersion:1,events:[child]})});await refresh();
+  const edgeId=await evaluate(`[...document.querySelectorAll('[data-edge-id]')].map(n=>n.dataset.edgeId).find(id=>{const tuple=JSON.parse(id);return tuple[1]===${JSON.stringify(child.eventId)}&&tuple[2]==='parent-run'})`);assert.ok(edgeId);
+  await evaluate(`document.querySelector('[data-edge-id='+CSS.escape(${JSON.stringify(edgeId)})+']').focus({preventScroll:true})`);await key('Enter');await wait(`document.querySelector('.projection-detail')!==null`);
+  const parent={...first,eventId:prefix+':parent',runId:prefix+':parent-run',attemptId:prefix+':parent-attempt'};
+  await call('append_events',{sessionId,envelopeJson:JSON.stringify({formatVersion:1,events:[parent]})});await refresh();await wait(`document.querySelector('.source-panel')===null`);
+ }
  try{
  await command('Page.addScriptToEvaluateOnNewDocument',{source:`globalThis.storageWrites=0;for(const k of ['setItem','removeItem','clear']){const f=Storage.prototype[k];Storage.prototype[k]=function(...args){storageWrites++;return f.apply(this,args)}}`});
+ if(process.env.AWL_TEST_REFRESH_ONLY){await step('real MCP append refreshes open entity facts and every source',refreshInspectionRegression)}else{
  await step('ordinary installed D reads actual MCP journey and original receipts',async()=>{await open();assert.equal(await evaluate(`document.querySelectorAll('#durable-project option').length`)>=2,true);assert.equal(await evaluate(`document.querySelectorAll('.graph-card.attempt').length`),2);assert.match(await text('#other-evidence'),/Other evidence/);assert.equal(eventMap.get('qa32:04.qa-v1').data.targetAttemptId,'qa32:v1');assert.equal(eventMap.get('qa32:08.qa-v2').data.targetAttemptId,'qa32:v2');await shot('durable-default')});
  const qa='.graph-card[data-event-id="qa32:04.qa-v1"]';
  for(const width of [1440,1280,777])await step(width+' pointer text/padding and Enter preserve source viewport and focus',async()=>{
@@ -101,6 +145,8 @@ try {
   await click('#diagnostics [data-evidence-source="r:foreign"]');await exact('r:foreign');await shot('durable-foreign-source');
  });
  await step('memory only credentials and same-origin read-only traffic',async()=>{assert.equal(await evaluate('globalThis.storageWrites'),0);assert.equal(await evaluate('localStorage.length+sessionStorage.length'),0);assert.deepEqual(await evaluate('indexedDB.databases().then(v=>v.map(d=>d.name))'),[]);assert.deepEqual(requests.filter(u=>!u.startsWith(origin+'/')&&!u.startsWith('data:')),[]);assert.ok(requests.every(u=>!u.includes(token)));assert.deepEqual(scriptErrors,[])});
+ await step('real MCP append refreshes open entity facts and every source',refreshInspectionRegression);
+ }
  await writeFile(join(output,'results.txt'),logs.join('\n')+`\nTOTAL ${logs.length} PASS ${logs.length} FAIL 0 SKIP 0\n`);
  }catch(error){await writeFile(join(output,'failure.txt'),logs.join('\n')+'\n'+error.stack);console.error(error.stack);process.exitCode=1}
  await writeFile(join(output,'requests.json'),JSON.stringify(requests,null,2));

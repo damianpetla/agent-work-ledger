@@ -31,7 +31,7 @@ Producer v1 events retain task IDs without project/session/day/title fields; dur
 
 Files are UTF-8 v1 JSON envelopes limited to **1 MiB (1,048,576 encoded bytes)** and **1,000 event occurrences per import**. The unchanged [event contract](docs/event-contract.md) and [import API](docs/import-api.md) define identity, strict decoding, atomic validation, duplicate/conflict handling, ordering and receipts. Event content is a producer declaration. The [graph API](docs/graph-api.md) defines explicit evidence relations and diagnostics.
 
-The current browser workspaces keep data in browser memory. No localStorage, IndexedDB, outgoing remote runtime requests or AI analysis is used. Only structured diagnostic metadata belongs here: do not import transcripts, prompts, secrets or private conversation content.
+Example and Imported files keep data in browser memory; Durable ledger reads accepted history and original receipts persisted in the local SQLite database. No localStorage, IndexedDB, outgoing remote runtime requests or AI analysis is used. Only structured diagnostic metadata belongs here: do not import transcripts, prompts, secrets or private conversation content.
 
 ## Development and checks
 

@@ -6,7 +6,7 @@ This is a specification, not an implemented schema. [Product terms](product-brie
 
 ## Envelope and identity
 
-The file format is UTF-8 JSON: `{ "formatVersion": 1, "events": [...] }`. One file may contain several tasks; the viewer selects one task. Limits: 1 MiB encoded input, 1,000 events per import or receipt batch. No JSON duplicate object keys, non-finite numbers or unknown fields are accepted. Version other than 1 is an explicit unsupported-version error. V1 changes that alter meaning require a new formatVersion; do not silently migrate. No historical migration is promised in this release.
+The file format is UTF-8 JSON (strict decoding rejects invalid UTF-8 bytes; a leading BOM is explicitly rejected with guidance to save UTF-8 without BOM). The import boundary accepts raw bytes or raw JSON text, never an already-parsed object. The envelope is: `{ "formatVersion": 1, "events": [...] }`. One file may contain several tasks; the viewer selects one task. Limits: 1 MiB encoded input, 1,000 events per import or receipt batch. No JSON duplicate object keys, non-finite numbers or unknown fields are accepted. Version other than 1 is an explicit unsupported-version error. V1 changes that alter meaning require a new formatVersion; do not silently migrate. No historical migration is promised in this release.
 
 Every event has the following exact fields; nullable fields must be present with null when unknown. Additional fields are rejected.
 
@@ -22,7 +22,7 @@ Every event has the following exact fields; nullable fields must be present with
 | `source` | Object `{producerId, label, synthetic}`; IDs obey ID rules, label is display text, synthetic is boolean. A claim, not authenticated identity. |
 | `data` | Kind-specific object below. |
 
-IDs are ASCII strings of 1–128 characters from `[A-Za-z0-9._:-]`, case sensitive. Human labels, summaries and reasons are plain text, 1–500 characters. Render as text, never HTML. Event IDs are ledger-wide; task, actor and run IDs use producer namespaces too. A run belongs to one task and one assigned actor when known; an attempt belongs to one run. Conflicting bindings remain visible as correlation diagnostics, not silently repaired. Missing references are accepted as unresolved evidence to permit out-of-order delivery.
+IDs are ASCII strings of 1–128 characters from `[A-Za-z0-9._:-]`, case sensitive. Human labels, summaries and reasons are plain text, 1–500 Unicode code points. Render as text, never HTML. Event IDs are ledger-wide; task, actor and run IDs use producer namespaces too. A run belongs to one task and one assigned actor when known; an attempt belongs to one run. Conflicting bindings remain visible as correlation diagnostics, not silently repaired. Missing references are accepted as unresolved evidence to permit out-of-order delivery.
 
 ## Kinds and payloads
 

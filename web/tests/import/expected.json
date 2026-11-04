@@ -1,0 +1,45 @@
+{
+  "synthetic": {
+    "acceptedCount": 6,
+    "duplicateCount": 0,
+    "tasks": [
+      "demo:launch",
+      "demo:other-task"
+    ],
+    "launchTimeline": [
+      "demo:01",
+      "demo:02",
+      "demo:03",
+      "demo:04",
+      "demo:05"
+    ],
+    "runtimeEventId": "demo:03",
+    "runtimeConfiguredModel": "example-model",
+    "runtimeVerifiedModel": null
+  },
+  "outOfOrder": {
+    "acceptedCount": 5,
+    "duplicateCount": 0,
+    "timeline": [
+      "demo:01",
+      "demo:02",
+      "demo:03",
+      "demo:04",
+      "demo:05"
+    ]
+  },
+  "conflictAfterSynthetic": {
+    "code": "event_id_conflict",
+    "eventIndex": 1,
+    "field": "eventId",
+    "eventId": "demo:01",
+    "retainedCount": 6
+  },
+  "malformed": {
+    "code": "invalid_json",
+    "retainedCount": 6
+  },
+  "allKinds": {
+    "acceptedCount": 11
+  }
+}

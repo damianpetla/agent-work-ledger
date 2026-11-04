@@ -1,6 +1,6 @@
 # Agent Work Ledger
 
-Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. DAM-30 is accepted at `9656cc61e51d804b6e63f9518deaf1ce06171489`. This revision finalizes the DAM-32 local MCP/persistence contract and dependencies; there is no implemented backend or durable history yet. [Local MCP support/setup](docs/local-service.md) distinguishes verified dependency probes from future product commands, and [service contract v1](docs/ledger-api.md) defines the next implementation.
+Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. DAM-30 is accepted at `9656cc61e51d804b6e63f9518deaf1ce06171489`. DAM-37 now implements the shared durable Python core and its standalone storage checks. The MCP service/package and ordinary-D durable workspace remain unimplemented pending DAM-38 integration. [Local MCP support/setup](docs/local-service.md) distinguishes verified dependency probes from future product commands, and [service contract v1](docs/ledger-api.md) defines the next implementation.
 
 ## Run locally
 
@@ -27,7 +27,7 @@ V1 has task IDs but no registered project, session, day or work-title fields. Th
 
 Files are UTF-8 v1 JSON envelopes limited to **1 MiB (1,048,576 encoded bytes)** and **1,000 event occurrences per import**. The unchanged [event contract](docs/event-contract.md) and [import API](docs/import-api.md) define identity, strict decoding, atomic validation, duplicate/conflict handling, ordering and receipts. Event content is a producer declaration. The [graph API](docs/graph-api.md) defines explicit evidence relations and diagnostics.
 
-Data stays in browser memory. No localStorage, IndexedDB, outgoing remote runtime requests or AI analysis is used. Only structured diagnostic metadata belongs here: do not import transcripts, prompts, secrets or private conversation content.
+The current browser workspaces keep data in browser memory. No localStorage, IndexedDB, outgoing remote runtime requests or AI analysis is used. Only structured diagnostic metadata belongs here: do not import transcripts, prompts, secrets or private conversation content.
 
 ## Development and checks
 
@@ -50,6 +50,16 @@ AWL_TEST_ORIGIN=http://127.0.0.1:8774 AWL_TEST_CHROMIUM=/path/to/isolated/chromi
 [Working-D author evidence](web/tests/workspace/evidence.md) records versions, actual checks, first failures, bounds, screenshots, build hashes and limitations. These author results do not replace independent review/QA or the user trial. [Product brief](docs/product-brief.md) and [technical plan](docs/technical-plan.md) describe current scope and deferred results.
 
 Licensed under [MIT](LICENSE).
+
+## Shared durable core (DAM-37)
+
+CPython 3.12 can import `Ledger` and `LedgerError` from `agent_work_ledger.ledger` directly from this checkout. The dependency-free core registers immutable projects and whole-task sessions, validates raw v1 events and stores first receipts in one exclusively owned private SQLite directory. It has no service or CLI yet. [Core checks and consumer lifecycle](tests/core/README.md) document the public facade, error adapter, safe temporary process/crash tests, capacity and recovery limits.
+
+```sh
+python3.12 -m unittest discover -s tests/core -v
+```
+
+Author checks do not replace independent DAM-37 review/QA. MCP/UI/package integration and the DAM-32 user trial remain separate gates.
 
 ## Next implementation: local MCP and durable sessions
 

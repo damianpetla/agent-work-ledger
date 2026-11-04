@@ -253,6 +253,27 @@ try {
   const value=clone(kinds.find(event=>event.kind===kind));value.data.outcome='done';rejectRaw(text([value]),'invalid_schema','data.outcome',0);
  });
 } catch(error) { test('fixture loading',()=>{throw error;}); }
+// Shared raw Unicode corpus is also consumed by the durable Python core.
+try {
+ const response = await fetch('unicode.json');
+ const bytes = new Uint8Array(await response.arrayBuffer());
+ test('shared surrogate corpus preserves lone units and pair/literal identity',()=>{
+  const first = api.importBytes(emptySnapshot(),bytes,deps());
+  assert(first.ok && first.acceptedCount===3,'all Unicode records accepted');
+  same(first.snapshot.events.map(event=>event.eventId),['unicode:high','unicode:low','unicode:pair']);
+  assert(first.snapshot.events[0].data.summary==='\ud800','lone high surrogate retained');
+  assert(first.snapshot.events[1].data.summary==='\udc00','lone low surrogate retained');
+  assert([...first.snapshot.events[2].actorLabel].length===500,'paired escapes count code points');
+  const literal = JSON.stringify(JSON.parse(new TextDecoder().decode(bytes)));
+  const retry = importText(first.snapshot,literal,deps());
+  assert(retry.ok && retry.acceptedCount===0 && retry.duplicateCount===3,'literal non-BMP equals escaped pairs');
+  same(retry.snapshot.receipts,first.snapshot.receipts,'original receipts');
+  const oversized = JSON.parse(literal); oversized.events[0].actorLabel += '😀';
+  assert(importText(emptySnapshot(),JSON.stringify(oversized),deps()).error.code==='invalid_schema','501 code points rejected');
+ });
+ test('paired Unicode key escapes collide with literal keys',()=>rejectRaw('{"😀":1,"\\ud83d\\ude00":2}','duplicate_key'));
+} catch(error) { test('Unicode fixture loading',()=>{throw error;}); }
+
 const failed = results.filter(line=>line.startsWith('FAIL')).length;
 document.querySelector('#results').textContent = `${results.join('\n')}\nTOTAL ${results.length} PASS ${results.length-failed} FAIL ${failed} SKIP 0`;
 document.title = failed ? 'FAIL import tests' : 'PASS import tests';

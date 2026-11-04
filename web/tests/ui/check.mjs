@@ -77,6 +77,7 @@ try {
   assert.match(await text('#source-content'),/Producer declaration/);assert.match(await text('#source-content'),/Yes · synthetic example/);assert.match(await text('#source-content'),/Ledger receipt/);
  });
  await step('keyboard source activation focuses inspector and returns to event',async()=>{
+  await wait('document.activeElement.id === "source-title"');
   await evaluate('document.querySelectorAll(".source-button")[1].focus()');
   await command('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
   await command('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});

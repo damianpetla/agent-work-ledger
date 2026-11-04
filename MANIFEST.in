@@ -1,0 +1,3 @@
+include web/index.html web/app.js
+include web/graph-ui/graph.js web/graph-ui/graph.css web/graph-ui/graph.js.LEGAL.txt web/graph-ui/THIRD-PARTY-LICENSES.txt
+include web/examples/synthetic-workflow.json web/examples/synthetic-timeline.json

@@ -1,8 +1,12 @@
 # Agent Work Ledger
 
-Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. DAM-30 is accepted at `9656cc61e51d804b6e63f9518deaf1ce06171489`. DAM-37 now implements the shared durable Python core and its standalone storage checks. The MCP service/package and ordinary-D durable workspace remain unimplemented pending DAM-38 integration. [Local MCP support/setup](docs/local-service.md) distinguishes verified dependency probes from future product commands, and [service contract v1](docs/ledger-api.md) defines the next implementation.
+Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. DAM-30 is accepted at `9656cc61e51d804b6e63f9518deaf1ce06171489`. DAM-37 now implements the shared durable Python core and its standalone storage checks. DAM-38 implements the installable loopback MCP service and ordinary-D durable workspace; independent integrated QA and user acceptance remain separate gates. [Local MCP installation/reporting](docs/local-service.md) provides runnable public commands; [service contract v1](docs/ledger-api.md) defines the unchanged boundaries.
 
-## Run locally
+## Run locally with durable history
+
+Follow the [local installation and reporting guide](docs/local-service.md): install the locked Python dependencies and source package in a private venv, generate a private token/config, then start `python -m agent_work_ledger serve --data-dir /private/awl-data --token-file /private/awl-token --port 8785` from outside the checkout. Open the loopback application, choose **Durable ledger**, enter the local token and explicitly Refresh. The guide includes two real reporting clients, a safe synthetic multi-reporter journey, retries, stop/restart and recovery. No AI service or global client configuration is needed.
+
+## Browser-memory example only
 
 Requires CPython **3.12** and desktop Chromium. Serve only public assets:
 
@@ -21,7 +25,7 @@ Open [Agent Work Ledger](http://127.0.0.1:8774/). Stop the dedicated server with
 5. Choose **Imported files** and open [the independent six-record example](web/examples/synthetic-timeline.json) through the native file chooser. It produces a different graph and two actual task IDs, including `demo:other-task`. This workspace starts empty and later file imports accumulate there. Repeating the same file gives 0 new / 6 duplicate events and preserves first receipts. Malformed, conflicting and unreadable files preserve the prior imported graph/source. The built-in Example stays separate and retains its current-tab receipts when reopened.
 6. Inspect runtime reports: configured settings are separate from reported runtime verification, and unknown remains unknown. Receipt confirms local acceptance only, never producer truth, independence or completion. Reload resets imported data and recreates the example with new current-tab receipts; keep original files for reconstruction. Startup fetch/validation failure shows an actionable error and leaves manual import available, rather than displaying a fallback graph.
 
-V1 has task IDs but no registered project, session, day or work-title fields. The task directory uses actual accepted IDs. Familiar names inside synthetic records are labels only. There is no inferred owner/waiting summary, cost calculation, real producer, collector, project history or factory integration.
+Producer v1 events retain task IDs without project/session/day/title fields; durable project and whole-task session registrations are separate explicit companion metadata. The task directory uses actual accepted IDs. Familiar names inside synthetic records are labels only. There is no inferred owner/waiting summary, cost calculation, automatic collector or factory integration. Durable history is opt-in through explicit MCP reporting.
 
 ## Input and privacy
 
@@ -53,14 +57,20 @@ Licensed under [MIT](LICENSE).
 
 ## Shared durable core (DAM-37)
 
-CPython 3.12 can import `Ledger` and `LedgerError` from `agent_work_ledger.ledger` directly from this checkout. The dependency-free core registers immutable projects and whole-task sessions, validates raw v1 events and stores first receipts in one exclusively owned private SQLite directory. It has no service or CLI yet. [Core checks and consumer lifecycle](tests/core/README.md) document the public facade, error adapter, safe temporary process/crash tests, capacity and recovery limits.
+CPython 3.12 can import `Ledger` and `LedgerError` from `agent_work_ledger.ledger` directly from this checkout. The dependency-free core registers immutable projects and whole-task sessions, validates raw v1 events and stores first receipts in one exclusively owned private SQLite directory. The local service and CLI consume this same facade. [Core checks and consumer lifecycle](tests/core/README.md) document the public facade, error adapter, safe temporary process/crash tests, capacity and recovery limits.
 
 ```sh
 python3.12 -m unittest discover -s tests/core -v
 ```
 
-Author checks do not replace independent DAM-37 review/QA. MCP/UI/package integration and the DAM-32 user trial remain separate gates.
+Author checks do not replace independent DAM-37 review/QA. The DAM-32 integrated QA and user trial remain separate gates.
 
-## Next implementation: local MCP and durable sessions
+## Local MCP and durable sessions
 
-DAM-32 adds public local installation, explicit project and whole-task session registration, real Streamable HTTP MCP reporting to shared SQLite storage, and ordinary D reads of exact events/first receipts after restart. [Architecture and evidence boundary](docs/architecture.md) and [technical plan](docs/technical-plan.md) define ownership and independent QA/user trial. The pinned Python and Inspector locks can be installed now for dependency checks; the Ledger service/package remains unimplemented at this contract revision. Self-hosted packaging/security is later DAM-39, richer day browsing DAM-40. Studio integration and actual VPS deployment are excluded.
+DAM-38 supplies official-SDK Streamable HTTP `/mcp` with three reporting tools, authenticated health/global snapshot reads, a fixed eight-asset public package and validated durable snapshot hydration into ordinary D. Source inspection separates exact accepted events from original durable receipts. Example/Imported files stay ephemeral; stale/invalid service responses preserve the prior durable graph/source. [Architecture](docs/architecture.md) distinguishes implemented source, author runtime evidence and independent acceptance.
+
+```sh
+node web/tests/durable/check.mjs
+```
+
+[Installed-service checks](tests/service/README.md) document real SDK/Inspector processes, HTTP security/chunked limits, clean installation and durable Chromium restart/stale/source checks. These are author controls, not self-acceptance. Self-hosted packaging/security is later DAM-39 and richer day browsing DAM-40. Studio integration and actual VPS deployment are excluded.

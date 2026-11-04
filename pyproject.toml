@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools==84.2.1", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-work-ledger"
+version = "0.1.0"
+description = "Explicit local MCP event ledger and source-linked inspection"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = ["mcp==2.3.0", "starlette==1.10.0", "uvicorn==0.54.0", "httpx2==2.16.0"]
+
+[tool.setuptools]
+packages = ["agent_work_ledger"]

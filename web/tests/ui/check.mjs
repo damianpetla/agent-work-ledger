@@ -190,7 +190,7 @@ try {
   assert.deepEqual(requests.filter(url=>!url.startsWith(origin+'/')&&!url.startsWith('data:')),[]);assert.deepEqual(scriptErrors,[]);
  });
  await step('accepted importer regressions pass through integrated server',async()=>{
-  await open('/tests/import/');await wait('document.title === "PASS import tests" || document.title === "FAIL import tests"');assert.match(await text('#results'),/TOTAL 168 PASS 168 FAIL 0 SKIP 0$/);
+  await open('/tests/import/');await wait('document.title === "PASS import tests" || document.title === "FAIL import tests"');assert.match(await text('#results'),/TOTAL 170 PASS 170 FAIL 0 SKIP 0$/);
  });
  const extraFile=process.env.AWL_TEST_EXTRA_FILE;
  if(extraFile){

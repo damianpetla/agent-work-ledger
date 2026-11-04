@@ -53,6 +53,12 @@ try {
  }
  const example=join(root,'web/examples/synthetic-timeline.json');
  const fixture=name=>join(root,'web/tests/import',name);
+ const makeEvent=(eventId,occurredAt=null)=>({
+  eventId,taskId:'boundary:task',actorId:'boundary:actor',actorLabel:'Boundary actor',roleLabel:null,
+  runId:null,attemptId:null,kind:'consultation',occurredAt,
+  source:{producerId:'boundary:producer',label:'Synthetic UI boundary fixture',synthetic:true},
+  data:{toActorId:'boundary:recipient',question:'Boundary smoke check'}
+ });
  async function step(name,run){try{await run();report.push('PASS '+name);}catch(error){report.push('FAIL '+name+': '+error.message);throw error;}}
  await open();
  await step('empty workspace and visible reconstruction instructions',async()=>{
@@ -90,7 +96,62 @@ try {
    await selectFile(path);assert.match(await text('#import-error'),new RegExp(code));assert.match(await text('#import-error'),/previous workspace is unchanged/);assert.equal(await text('#timeline'),before);assert.equal(await text('#source-content'),source);
   }
  });
+ await step('exact 1 MiB file accepts 1000 events in contract order and rejects invalid boundaries atomically',async()=>{
+  const events=Array.from({length:1000},(_,index)=>makeEvent(`limit:${String(999-index).padStart(4,'0')}`));
+  const compact=JSON.stringify({formatVersion:1,events});
+  assert.ok(Buffer.byteLength(compact,'utf8')<1048576,'1000-event fixture must fit before whitespace padding');
+  const maximum=compact+' '.repeat(1048576-Buffer.byteLength(compact,'utf8'));
+  assert.equal(Buffer.byteLength(maximum,'utf8'),1048576);
+  const accepted=join(profile,'exact-1mib-1000-events.json');await writeFile(accepted,maximum);
+  await selectFile(accepted);
+  await evaluate('[...document.querySelectorAll(".task-button")].find(button=>button.dataset.taskId==="boundary:task").click()');
+  const expectedIds=Array.from({length:1000},(_,index)=>`limit:${String(index).padStart(4,'0')}`);
+  assert.match(await text('#import-status'),/1000 new, 0 duplicate/);
+  assert.equal(await text('#event-count'),'1000 events');
+  assert.deepEqual(await evaluate('[...document.querySelectorAll(".source-button")].map(button=>button.dataset.eventId)'),expectedIds);
+
+  const priorTimeline=await text('#timeline'),priorSource=await text('#source-content');
+  const tooMany=join(profile,'1001-events.json');
+  await writeFile(tooMany,JSON.stringify({formatVersion:1,events:Array.from({length:1001},(_,index)=>makeEvent(`too-many:${String(index).padStart(4,'0')}`))}));
+  await selectFile(tooMany);
+  assert.match(await text('#import-error'),/event_limit/);assert.match(await text('#import-error'),/previous workspace is unchanged/);
+  assert.equal(await text('#timeline'),priorTimeline);assert.equal(await text('#source-content'),priorSource);
+
+  const oversize=join(profile,'one-byte-over-limit.json');
+  const oversizeJson=JSON.stringify({formatVersion:1,events:[makeEvent('oversize:one')]});
+  const oversizeContent=oversizeJson+' '.repeat(1048577-Buffer.byteLength(oversizeJson,'utf8'));
+  assert.equal(Buffer.byteLength(oversizeContent,'utf8'),1048577);await writeFile(oversize,oversizeContent);
+  await selectFile(oversize);
+  assert.match(await text('#import-error'),/input_limit/);assert.match(await text('#import-error'),/previous workspace is unchanged/);
+  assert.equal(await text('#timeline'),priorTimeline);assert.equal(await text('#source-content'),priorSource);
+
+  const bom=join(profile,'leading-bom.json');await writeFile(bom,Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),Buffer.from(JSON.stringify({formatVersion:1,events:[makeEvent('bom:one')]}))]));
+  await selectFile(bom);
+  assert.match(await text('#import-error'),/leading_bom/);assert.match(await text('#import-error'),/previous workspace is unchanged/);
+  assert.equal(await text('#timeline'),priorTimeline);assert.equal(await text('#source-content'),priorSource);
+ });
+ await step('tied and unknown occurrence times keep exact source-link order',async()=>{
+  await command('Page.reload');await wait('document.readyState === "complete" && document.querySelector("#event-count")?.textContent === "0 events"');
+  const events=[
+   makeEvent('order:null:z'),
+   makeEvent('order:tie:z','2026-01-02T03:04:05.000Z'),
+   makeEvent('order:early','2026-01-01T00:00:00.000Z'),
+   makeEvent('order:null:a'),
+   makeEvent('order:tie:a','2026-01-02T03:04:05.000Z')
+  ];
+  const path=join(profile,'tied-and-null-order.json');await writeFile(path,JSON.stringify({formatVersion:1,events}));await selectFile(path);
+  const expectedIds=['order:early','order:tie:a','order:tie:z','order:null:a','order:null:z'];
+  assert.deepEqual(await evaluate('[...document.querySelectorAll(".source-button")].map(button=>button.dataset.eventId)'),expectedIds);
+  assert.match(await text('#timeline'),/Occurred · unknown/);
+  for(const eventId of expectedIds){
+   await evaluate(`document.querySelector('.source-button[data-event-id="${eventId}"]').click()`);
+   assert.equal(await text('.source-id'),eventId,`source link did not inspect ${eventId}`);
+   assert.equal(JSON.parse(await text('.raw-record pre')).eventId,eventId,`raw source did not match ${eventId}`);
+  }
+ });
  await step('task selection filters timeline and source consistently',async()=>{
+  await command('Page.reload');await wait('document.readyState === "complete" && document.querySelector("#event-count")?.textContent === "0 events"');
+  await selectFile(example);
   await evaluate('document.querySelectorAll(".task-button")[1].click()');assert.equal(await text('#timeline-heading'),'demo:other-task');assert.equal(await evaluate('document.querySelectorAll(".event-card").length'),1);assert.match(await text('#source-content'),/demo:other/);
   await evaluate('document.querySelectorAll(".task-button")[0].click()');
  });
@@ -127,6 +188,35 @@ try {
  await step('accepted importer regressions pass through integrated server',async()=>{
   await open('/tests/import/');await wait('document.title === "PASS import tests" || document.title === "FAIL import tests"');assert.match(await text('#results'),/TOTAL 168 PASS 168 FAIL 0 SKIP 0$/);
  });
+ const extraFile=process.env.AWL_TEST_EXTRA_FILE;
+ if(extraFile){
+  const requestStart=requests.length,errorStart=scriptErrors.length;
+  await open();await wait('document.querySelector("#event-count")?.textContent === "0 events"');
+  await selectFile(resolve(extraFile));
+  const eventIds=await evaluate('[...document.querySelectorAll(".source-button")].map(button=>button.dataset.eventId)');
+  const observations={
+   inputPath:resolve(extraFile),status:await text('#import-status'),bodyText:await evaluate('document.body.innerText'),
+   taskIds:await evaluate('[...document.querySelectorAll(".task-button")].map(button=>button.dataset.taskId)'),
+   selectedTask:await text('#timeline-heading'),eventCount:await text('#event-count'),orderedTimelineEventIds:eventIds,
+   pageErrors:[],requests:[],unexpectedElements:null,qaInjected:null,inspections:[]
+  };
+  for(let index=0;index<eventIds.length;index++){
+   const eventId=eventIds[index];
+   await evaluate(`document.querySelectorAll(".source-button")[${index}].click()`);
+   const sourceRecords=await evaluate('[...document.querySelectorAll("#source-content .raw-record pre")].map(node=>node.textContent)');
+   observations.inspections.push({
+    eventId,selectedEventId:await text('.source-id'),sourceJson:sourceRecords[0]?JSON.parse(sourceRecords[0]):null,
+    separateReceipt:sourceRecords[1]?JSON.parse(sourceRecords[1]):null,sourcePanelText:await text('#source-content')
+   });
+   const screenshot=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});
+   await writeFile(join(output,`extra-event-${String(index+1).padStart(2,'0')}.png`),Buffer.from(screenshot.data,'base64'));
+  }
+  observations.pageErrors=scriptErrors.slice(errorStart);
+  observations.requests=requests.slice(requestStart);
+  observations.unexpectedElements=await evaluate('document.querySelectorAll("#timeline img,#timeline script,#source-content img,#source-content script").length');
+  observations.qaInjected=await evaluate('globalThis.qaInjected ?? null');
+  await writeFile(join(output,'observations.json'),JSON.stringify(observations,null,2));
+ }
  console.log(report.join('\n'));console.log(`TOTAL ${report.length} PASS ${report.length} FAIL 0 SKIP 0`);
  await writeFile(join(output,'results.txt'),report.join('\n')+`\nTOTAL ${report.length} PASS ${report.length} FAIL 0 SKIP 0\n`);
  await writeFile(join(output,'requests.json'),JSON.stringify(requests,null,2));

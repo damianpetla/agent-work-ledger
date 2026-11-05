@@ -17,7 +17,7 @@ A project has zero or more sessions; each session has exactly one existing proje
 
 Registration compares all declared fields structurally. Equal ID/content is idempotent; same ID/different content, task already bound elsewhere, or attempted reparenting returns `registration_conflict`. Unknown project returns `project_not_found`. A successful new record gets server-owned `registeredAt` and `registrationReceiptId`; duplicate registration returns the first metadata unchanged. Project and session registration are separate atomic transactions. If project registration succeeded and session registration failed, the project remains; no implicit project rollback is claimed. There are no edit/delete/rename tools. IDs are unique within their entity kind; event IDs retain ledger-wide uniqueness.
 
-Legacy v1 files remain unregistered in the separate file workspace. Explicitly register their actual task ID before reporting them to durable storage. A file containing several tasks must be partitioned by exact task ID for explicit session submissions; never drop or reassign events implicitly. Event JSON gains no project/session fields. Export/backup retains the companion registration mapping; an event-only v1 export cannot convey project/session identity.
+Raw v1 envelopes remain valid reporting input without an application file workspace. Explicitly register their actual task ID and session binding before reporting them to durable storage through MCP. Input containing several tasks must be partitioned by exact task ID for explicit session submissions; never drop or reassign events implicitly. Event JSON gains no project/session fields. Export/backup retains the companion registration mapping; an event-only v1 export cannot convey project/session identity.
 
 ## Shared application core
 
@@ -70,10 +70,9 @@ Actual HTTP boundaries are separate:
 
 | Boundary | HTTP status / payload |
 | --- | --- |
-| Authenticated `GET /v1/snapshot` or `GET /v1/health`, available core | 200 and the documented `ok:true` read envelope |
+| `GET /v1/snapshot` or `GET /v1/health` without application authentication, available core | 200 and the documented `ok:true` read envelope |
 | Read route cannot obtain valid storage/snapshot (`busy` or `storage_unavailable`) | 503 and versioned `ok:false` error envelope; never partial/empty success |
-| Invalid/duplicate Host or present Origin | 403 before dispatch; malformed HTTP rejected natively by the HTTP parser before ASGI (duplicate Host:400); no mutation |
-| Invalid present Host/Origin on a protected read or `/mcp` | 403 before dispatch; transport rejection |
+| Invalid/duplicate Host or present Origin on any HTTP route, including root/assets, reads and `/mcp` | 403 before dispatch; malformed HTTP rejected natively by the HTTP parser before ASGI (duplicate Host:400); no mutation |
 | Outer `/mcp` body exceeds request bound | 413 before tool/core dispatch; separate from inner-envelope `input_limit` tool error |
 | Unknown HTTP route / unsupported method | 404 / 405; no invented registration or append HTTP endpoint |
 

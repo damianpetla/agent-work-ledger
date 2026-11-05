@@ -1,6 +1,6 @@
 # Installed local MCP and durable-D checks
 
-Follow [public setup](../../docs/local-service.md): fresh CPython 3.12 venv, locked runtime closure, non-editable product install. Launch outside checkout with PYTHONPATH unset. Eight fixed assets from `agent_work_ledger/assets.py` are bundled; source-only test pages are not public product routes.
+Follow [public setup](../../docs/local-service.md): fresh CPython 3.12 venv, locked runtime closure, non-editable product install. Launch outside checkout with PYTHONPATH unset. Seven fixed assets from `agent_work_ledger/assets.py` are bundled; source-only test pages are not public product routes.
 
 ## Real installed process/wire suite
 
@@ -9,9 +9,9 @@ python3.12 tests/service/check.py --python /absolute/venv/bin/python --inspector
 python3.12 tests/service/check.py --python /absolute/venv/bin/python --inspector /absolute/checkout/tools/mcp-client/node_modules/.bin/mcp-inspector --output /tmp/awl-wire-discovery --port 18939 -k discovery
 ```
 
-The stdlib harness refuses an occupied port, creates private synthetic temporary data/token/config, starts its own installed service from a temporary CWD without PYTHONPATH, observes authenticated readiness, runs separate installed SDK and Inspector client processes, saves the actual first snapshot oracle and stops only its own PID. Temporary data is cleaned. No existing preview, personal client config or global setting is used. The journey has two projects/sessions, 12 primary events and one separate-task event. Public `report journey` is exercised as an all-duplicate retry.
+The stdlib harness refuses an occupied port, creates private synthetic temporary data, starts its own installed service from a temporary CWD without PYTHONPATH, observes no-auth readiness, runs separate installed SDK and Inspector client processes, saves the actual first snapshot oracle and stops only its own PID. Temporary data is cleaned. No existing preview, personal client config or global setting is used. The journey has two projects/sessions, 12 primary events and one separate-task event. Public `report journey` is exercised as an all-duplicate retry.
 
-Eight named tests cover discovery/result/schema agreement, two clients, HTTP 200 domain isError+matching structured/text versus protocol errors, auth/Host/Origin/no-store/static privacy/no-CORS, chunked 4 MiB/+1 and inner limits, restart/response-discard retry, negative token/owner/corruption/version startup, and real read503 under a temporary external SQLite exclusive lock. SQL solely induces negative fixtures/locks, never successful receipts. Modern2026 protocol raw requests carry mandatory protocol/client-capability metadata and mcp-method/name headers. Exactly 4 MiB reaches ordinary invalid-JSON protocol handling; +1 is 413. An intentionally invalid inherited catalog proves the Inspector wrapper isolates config mode. No bearer is printed.
+Eight named tests cover discovery/result/schema agreement, two clients, HTTP 200 domain isError+matching structured/text versus protocol errors, all-route Host/Origin/no-store/static privacy/no-CORS, chunked 4 MiB/+1 and inner limits, restart/response-discard retry, removed credential/remote-bind flags, owner/corruption/version startup, and real read503 under a temporary external SQLite exclusive lock. SQL solely induces negative fixtures/locks, never successful receipts. Modern2026 protocol raw requests carry mandatory protocol/client-capability metadata and mcp-method/name headers. Exactly 4 MiB reaches ordinary invalid-JSON protocol handling; +1 is 413. An intentionally invalid inherited catalog proves the Inspector wrapper isolates URL-only client state. No Authorization is required.
 
 ## Raw hydration
 
@@ -24,15 +24,15 @@ AWL_SNAPSHOT_FILE=/tmp/awl-wire-evidence/first-snapshot.json node web/tests/dura
 
 ## Ordinary installed durable browser
 
-Seed a dedicated synthetic ledger using the public guide's token/config helpers and `report journey`, then stop the seed service. The driver owns its own service lifecycle; no existing PID is passed or stopped.
+Seed a dedicated synthetic ledger using the public guide's URL-only `report journey`, then stop the seed service. The driver owns its own service lifecycle; no existing PID is passed or stopped.
 
 ```sh
-AWL_TEST_ORIGIN=http://127.0.0.1:18938 AWL_TEST_CHROMIUM=/absolute/isolated/chromium AWL_TEST_OUTPUT=/tmp/awl-durable-browser AWL_TEST_PYTHON=/absolute/venv/bin/python AWL_TEST_DATA_DIR=/private/awl-test/data AWL_TEST_TOKEN_FILE=/private/awl-test/token node web/tests/durable/browser.mjs
+AWL_TEST_ORIGIN=http://127.0.0.1:18938 AWL_TEST_CHROMIUM=/absolute/isolated/chromium AWL_TEST_OUTPUT=/tmp/awl-durable-browser AWL_TEST_PYTHON=/absolute/venv/bin/python AWL_TEST_DATA_DIR=/private/awl-test/data node web/tests/durable/browser.mjs
 ```
 
-Ten groups exercise actual installed D and MCP/SQLite source/first-receipt oracle, physical text/padding and native Enter at 1440/1280/777, project selection, Close/Return focus+viewport, reload token reset, real owned service stop/Refresh/stale retained source/restart and memory/network audit. Labelled CDP Fetch substitutions test 503/malformed/invalid other-task snapshots only; successful data always comes from real storage. A final actual SDK step adds registered diagnostic tasks from versioned branch-cycle/reference fixtures and inspects a foreign-task source/receipt using the global map. Repetition reuses exact diagnostic IDs safely.
+Fourteen groups exercise actual installed D and MCP/SQLite source/first-receipt oracle, physical text/padding and native Enter at 1440/1280/777, project selection, Close/Return focus+viewport, one automatic no-auth read on open/reload, real owned service stop/Refresh/stale retained source/restart and memory/network audit. Labelled CDP Fetch substitutions test 503/malformed/invalid other-task snapshots only; successful data always comes from real storage. A final actual SDK step adds registered diagnostic tasks from versioned branch-cycle/reference fixtures and inspects a foreign-task source/receipt using the global map. Repetition reuses exact diagnostic IDs safely.
 
-The driver starts isolated Chromium with a fresh temporary profile and stops only its own service/browser, removing only that profile. Outputs are named results, safe synthetic snapshots, masked-password screenshots and URL-only audit; Authorization values are not logged. Observe actual page assertions, not process exit alone. Do not use a user database or private browser.
+The driver starts isolated Chromium with a fresh temporary profile and stops only its own service/browser, removing only that profile. Outputs are named results, safe synthetic snapshots, screenshots without credentials and URL-only audit; auth/cookie header presence is checked without logging values. Observe actual page assertions, not process exit alone. Do not use a user database or private browser.
 
 ## Existing regressions
 
@@ -44,6 +44,14 @@ npm ci --prefix graph-ui --ignore-scripts
 npm run build --prefix graph-ui
 ```
 
-Existing UI/workspace browser runners retain `AWL_TEST_ORIGIN`, `AWL_TEST_CHROMIUM`, `AWL_TEST_OUTPUT`. Run source-only importer pages on a separate dedicated static `web` server; label that separately from installed application evidence. Current counts: importer 170, graph 27, workspace 6, UI 14, graph-workspace 10. The stale UI 168 expectation was updated to 170. Durable controls above exercise installed resources from outside checkout, with no source fallback.
+The old14 file-import UI and10 file-workspace browser groups were retired with the removed features, not rerun or counted as retained. Their relevant semantics are covered by the installed durable runner: pointer text/padding/Enter at1440/1280/777; actual pan and zoom; Return/Close focus and camera; exact producer JSON/original receipts; multi-source run/actor/attempt refresh and edge invalidation; global cross-task/cycle diagnostics; 128-character IDs/long literal metadata/500-code-point summary at200% graph text; lazy separate Example; stale invalid/offline retention; honest empty real ledger. The Graph renderer/router/display code remains byte-identical. Source-only importer golden tests remain170, graph27 and updated workspace facade6; durable adapter35 (36 with real oracle). No hidden checkout fallback exists. Run the source-only importer page on a separate dedicated static server for parser infrastructure, never call it installed-product evidence.
 
 Core files remain byte-identical to accepted DAM-37 and its process/crash/full-capacity suite remains available. Author commands prepare evidence; independent exact-version Standards/Spec and parent DAM-32 integrated QA/user review remain separate. No VPS, automatic reporting, rich day UI or Studio integration.
+
+Raw duplicate Host requests are rejected by pinned h11 with400 before ASGI; duplicate Origin and malformed/mismatched values reaching Boundary return403. Both paths retain the snapshot unchanged. No custom HTTP parser is introduced. Negative hydration responses are labelled CDP instrumentation only; empty/startup/reload/offline/restart success paths use actual installed service/storage.
+
+Source-only strict importer in real Chromium (own free port, not installed-app evidence):
+
+```sh
+python3.12 web/tests/import/browser.py --chromium /absolute/isolated/chromium --output /tmp/awl-parser-evidence --port 18939
+```

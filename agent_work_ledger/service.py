@@ -1,6 +1,5 @@
 """Local MCP transport adapter; Ledger alone owns domain rules and storage."""
 from contextlib import asynccontextmanager
-import hmac
 from importlib.resources import files
 import mimetypes
 
@@ -41,7 +40,7 @@ def json_response(value, status=200, headers=None):
     return Response(dump(value), status_code=status, media_type='application/json', headers=headers)
 
 
-def create_app(data_dir, token, port):
+def create_app(data_dir, port):
     state = {}
     mcp = StrictServer('Agent Work Ledger')
 
@@ -115,27 +114,21 @@ def create_app(data_dir, token, port):
     application = Starlette(lifespan=lifespan, routes=[Route('/v1/snapshot', snapshot, methods=['GET']),
         Route('/v1/health', health, methods=['GET']), Route('/mcp', inner, methods=['GET', 'POST', 'DELETE']),
         Route('/{path:path}', asset, methods=['GET'])])
-    return Boundary(application, host, origin, token)
+    return Boundary(application, host, origin)
 
 
 class Boundary:
-    def __init__(self, app, host, origin, token):
+    def __init__(self, app, host, origin):
         self.app, self.host, self.origin = app, host.encode('ascii'), origin.encode('ascii')
-        self.credential = b'Bearer ' + token.encode('ascii')
 
     async def __call__(self, scope, receive, send):
-        protected = scope['type'] == 'http' and (scope['path'] == '/mcp' or scope['path'].startswith('/v1/'))
-        if not protected:
+        if scope['type'] != 'http':
             return await self.app(scope, receive, send)
         headers = {}
         for key, value in scope['headers']:
             headers.setdefault(key.lower(), []).append(value)
         if headers.get(b'host') != [self.host] or (b'origin' in headers and headers[b'origin'] != [self.origin]):
             return await Response('Use the configured loopback Host and Origin.', status_code=403)(scope, receive, send)
-        auth = headers.get(b'authorization', [])
-        if len(auth) != 1 or not hmac.compare_digest(auth[0], self.credential):
-            return await Response('Bearer authentication required.', status_code=401,
-                                  headers={'WWW-Authenticate': 'Bearer', 'Cache-Control': 'no-store'})(scope, receive, send)
         async def no_store(message):
             if message['type'] == 'http.response.start':
                 message['headers'] = [(k, v) for k, v in message['headers'] if k.lower() != b'cache-control'] + [(b'cache-control', b'no-store')]

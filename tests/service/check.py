@@ -26,10 +26,7 @@ class InstalledService(unittest.TestCase):
         cls.proc = None
         # Refuse to disturb any process already using the assigned test port.
         with socket.socket() as probe: probe.bind(('127.0.0.1', cls.port))
-        cls.cli('init-token', '--output', str(cls.private / 'token'))
-        cls.cli('inspector-config', '--token-file', str(cls.private / 'token'), '--port', str(cls.port), '--output', str(cls.private / 'inspector.json'))
         cls.report('prepare-example', '--output-dir', str(cls.private / 'journey'))
-        cls.token = (cls.private / 'token').read_text().strip()
         cls.start()
         cls.discovery = cls.sdk()
         for tool, name in [('register_project','project-a'),('register_project','project-b'),('register_session','session-a'),('register_session','session-b'),('append_events','journey-sdk')]:
@@ -51,7 +48,7 @@ class InstalledService(unittest.TestCase):
         r=cls.command('agent_work_ledger.report',*args); assert r.returncode==0, r.stderr; return r
     @classmethod
     def sdk(cls,tool=None,name=None,arguments=None,discard=False):
-        args=['sdk','--token-file',str(cls.private/'token'),'--port',str(cls.port)]
+        args=['sdk','--port',str(cls.port)]
         if tool:
             path=cls.private/'journey'/f'{name}.args.json' if name else cls.private/'case.args.json'
             if arguments is not None: path.write_text(json.dumps(arguments,ensure_ascii=True))
@@ -64,14 +61,14 @@ class InstalledService(unittest.TestCase):
         return result
     @classmethod
     def inspector(cls,tool=None,name=None):
-        args=['inspector','--executable',CONFIG.inspector,'--config',str(cls.private/'inspector.json'),'--state-dir',str(cls.private/'client')]
+        args=['inspector','--executable',CONFIG.inspector,'--port',str(cls.port),'--state-dir',str(cls.private/'client')]
         if tool: args+=['--tool',tool,'--args-file',str(cls.private/'journey'/f'{name}.args.json')]
         result=cls.report(*args)
         (cls.output/f'inspector-{name or "discovery"}.json').write_text(result.stdout)
         return json.loads(result.stdout)
     @classmethod
     def get(cls,path,headers=None,body=None,method='GET'):
-        values={'Authorization':'Bearer '+cls.token} if headers is None else headers
+        values={} if headers is None else headers
         try:
             with urlopen(Request(cls.base+path,data=body,headers=values,method=method),timeout=15) as r:
                 raw=r.read(); status=r.status; received={k.lower():v for k,v in r.headers.items()}
@@ -82,7 +79,7 @@ class InstalledService(unittest.TestCase):
     @classmethod
     def start(cls):
         cls.log=open(cls.output/'server.log','a')
-        cls.proc=subprocess.Popen([CONFIG.python,'-m','agent_work_ledger','serve','--data-dir',str(cls.private/'data'),'--token-file',str(cls.private/'token'),'--port',str(cls.port)],cwd=cls.private,env=cls.env,stdout=cls.log,stderr=cls.log)
+        cls.proc=subprocess.Popen([CONFIG.python,'-m','agent_work_ledger','serve','--data-dir',str(cls.private/'data'),'--port',str(cls.port)],cwd=cls.private,env=cls.env,stdout=cls.log,stderr=cls.log)
         deadline=time.monotonic()+12
         while time.monotonic()<deadline:
             if cls.proc.poll() is not None: raise AssertionError('Service exited; inspect server.log')
@@ -110,7 +107,7 @@ class InstalledService(unittest.TestCase):
 
     def test_public_journey_helper_retries_both_clients(self):
         before=self.get('/v1/snapshot')[1]
-        self.report('journey','--args-dir',str(self.private/'journey'),'--token-file',str(self.private/'token'),'--port',str(self.port),'--inspector-executable',CONFIG.inspector,'--inspector-config',str(self.private/'inspector.json'),'--state-dir',str(self.private/'client'))
+        self.report('journey','--args-dir',str(self.private/'journey'),'--port',str(self.port),'--inspector-executable',CONFIG.inspector,'--state-dir',str(self.private/'client'))
         self.assertEqual(self.get('/v1/snapshot')[1],before)
         raw='{"formatVersion":1,"events":[],"events":[]}'
         source=self.private/'raw-envelope.json'; source.write_text(raw)
@@ -134,62 +131,84 @@ class InstalledService(unittest.TestCase):
         cases.append(('session_task_mismatch',dict(raw,envelopeJson=json.dumps({'formatVersion':1,'events':[original,wrong]}))))
         for code,arguments in cases:
             wire=json.dumps({'jsonrpc':'2.0','id':7,'method':'tools/call','params':{'name':'append_events','arguments':arguments,'_meta':{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientCapabilities':{}}}}).encode()
-            status,result,_=self.get('/mcp',{'Authorization':'Bearer '+self.token,'Content-Type':'application/json','Accept':'application/json, text/event-stream','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'append_events'},wire,'POST')
+            status,result,_=self.get('/mcp',{'Content-Type':'application/json','Accept':'application/json, text/event-stream','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'append_events'},wire,'POST')
             self.assertEqual(status,200,result)
             self.assertTrue(result['result']['isError']);self.assertEqual(result['result']['structuredContent']['error']['code'],code)
             self.assertEqual(json.loads(result['result']['content'][0]['text']),result['result']['structuredContent'])
         for arguments in [dict(raw,extra='unknown'),dict(raw,sessionId=None),{'sessionId':3}]:
             wire=json.dumps({'jsonrpc':'2.0','id':8,'method':'tools/call','params':{'name':'append_events','arguments':arguments,'_meta':{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientCapabilities':{}}}}).encode()
-            _,result,_=self.get('/mcp',{'Authorization':'Bearer '+self.token,'Content-Type':'application/json','Accept':'application/json, text/event-stream','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'append_events'},wire,'POST')
+            _,result,_=self.get('/mcp',{'Content-Type':'application/json','Accept':'application/json, text/event-stream','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'append_events'},wire,'POST')
             self.assertEqual(result['error']['code'],-32602)
         self.assertEqual(self.get('/v1/snapshot')[1],before)
 
-    def test_auth_host_origin_static_and_no_store(self):
-        for path in ['/v1/snapshot','/v1/health','/mcp']:
-            self.assertEqual(self.get(path,{})[0],401)
-            response=self.get(path,{'Authorization':'Bearer wrong'});self.assertEqual(response[0],401);self.assertEqual(response[2]['www-authenticate'],'Bearer')
-            self.assertEqual(self.get(path,{'Authorization':'Bearer '+self.token,'Origin':'http://evil.invalid'})[0],403)
-            self.assertEqual(self.get(path,{'Authorization':'Bearer '+self.token,'Host':'evil.invalid'})[0],403)
-        status,data,headers=self.get('/v1/snapshot');self.assertEqual(status,200);self.assertEqual(headers['cache-control'],'no-store')
-        for path in ['/ledger.sqlite3','/token','/.git/config','/../token','/%2e%2e/token','/v1/events']:
-            self.assertEqual(self.get(path,{})[0],401 if path.startswith('/v1/') else 404)
+    def test_local_boundary_all_routes_before_mutation(self):
+        before=self.get('/v1/snapshot')[1]
+        for path in ['/','/app.js','/graph-ui/graph.js','/v1/snapshot','/v1/health','/mcp']:
+            for headers in [{'Origin':'http://evil.invalid'},{'Host':'evil.invalid'},{'Origin':'null'}]:
+                self.assertEqual(self.get(path,headers)[0],403)
+            self.assertNotEqual(self.get(path,{})[0],401)
+            self.assertNotIn('www-authenticate',self.get(path,{})[2])
+            for header in ['Host','Origin']:
+                host=f'Host: 127.0.0.1:{self.port}\r\n'
+                extra=(host if header=='Host' else f'Origin: {self.base}\r\nOrigin: {self.base}\r\n')
+                with socket.create_connection(('127.0.0.1',self.port),timeout=5) as connection:
+                    connection.sendall(f'GET {path} HTTP/1.1\r\n{host}{extra}Connection: close\r\n\r\n'.encode())
+                    wire=connection.recv(4096);status=int(wire.split(b' ')[1])
+                # h11 rejects duplicate Host before ASGI with its native 400.
+                self.assertEqual(status,400 if header=='Host' else 403,(path,header,wire))
+        observations=[]
+        wire=json.dumps({'jsonrpc':'2.0','id':99,'method':'tools/call','params':{'name':'register_project','arguments':{'projectId':'boundary:must-not-exist','name':'Rejected synthetic write'},'_meta':{'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientCapabilities':{}}}}).encode()
+        for host,origin,expected in [(f'127.0.0.1:{self.port}','http://evil.invalid',403),('evil.invalid',None,403),(f'127.0.0.1:{self.port},evil.invalid',None,403),(f'127.0.0.1:{self.port}',self.base+'/',403)]:
+            headers={'Host':host,'Content-Type':'application/json','Accept':'application/json, text/event-stream','MCP-Protocol-Version':'2026-07-28','Mcp-Method':'tools/call','Mcp-Name':'register_project'}
+            if origin:headers['Origin']=origin
+            status,_,_=self.get('/mcp',headers,wire,'POST');self.assertEqual(status,expected);observations.append({'host':host,'origin':origin,'status':status})
+        for header,expected in [('Host',400),('Origin',403)]:
+            host=f'Host: 127.0.0.1:{self.port}\r\n'
+            extra=host if header=='Host' else f'Origin: {self.base}\r\nOrigin: {self.base}\r\n'
+            request=(f'POST /mcp HTTP/1.1\r\n{host}{extra}Content-Type: application/json\r\nAccept: application/json, text/event-stream\r\nMCP-Protocol-Version: 2026-07-28\r\nMcp-Method: tools/call\r\nMcp-Name: register_project\r\nContent-Length: {len(wire)}\r\nConnection: close\r\n\r\n').encode()+wire
+            with socket.create_connection(('127.0.0.1',self.port),timeout=5) as connection:
+                connection.sendall(request);response=connection.recv(4096)
+            status=int(response.split(b' ')[1]);self.assertEqual(status,expected)
+            observations.append({'duplicate':header,'method':'POST','status':status})
+        (self.output/'boundary-rejections.json').write_text(json.dumps(observations,indent=2))
+        self.assertEqual(self.get('/v1/snapshot')[1],before)
+        for path in ['/ledger.sqlite3','/token','/.git/config','/../token','/%2e%2e/token','/v1/events','/login','/logout']:
+            self.assertEqual(self.get(path)[0],404)
         self.assertEqual(self.get('/v1/snapshot',method='POST',body=b'{}')[0],405)
-        for path in ['/','/app.js','/graph-ui/graph.js','/graph-ui/graph.css','/examples/synthetic-workflow.json']:
-            self.assertEqual(self.get(path,{})[0],200)
-        self.assertEqual(self.get('/v1/snapshot?token=synthetic-query-only',{})[0],401)
-        self.assertEqual(self.get('/v1/health',{'Authorization':'Bearer '+self.token,'X-Forwarded-Host':'evil.invalid','X-Forwarded-Proto':'https'})[0],200)
-        preflight=self.get('/v1/snapshot',method='OPTIONS');self.assertEqual(preflight[0],405);self.assertNotIn('access-control-allow-origin',preflight[2])
-        self.assertNotIn(self.token,(self.output/'server.log').read_text())
+        self.assertEqual(self.get('/v1/snapshot',{'Authorization':'Bearer irrelevant'})[1],before)
+        self.assertEqual(self.get('/v1/health',{'X-Forwarded-Host':'evil.invalid','X-Forwarded-Proto':'https'})[0],200)
+        for path in ['/','/v1/snapshot','/mcp']:
+            response=self.get(path,method='OPTIONS');self.assertEqual(response[0],405);self.assertNotIn('access-control-allow-origin',response[2])
+        self.assertEqual(self.get('/v1/snapshot')[2]['cache-control'],'no-store')
 
     def test_chunked_outer_limit_and_inner_limits(self):
         for size,expected in [(4194304,400),(4194305,413)]:
             connection=http.client.HTTPConnection('127.0.0.1',self.port,timeout=20)
             body=(b' ' * min(65536,size-i) for i in range(0,size,65536))
-            connection.request('POST','/mcp',body=body,encode_chunked=True,headers={'Authorization':'Bearer '+self.token,'Content-Type':'application/json','Accept':'application/json, text/event-stream'})
+            connection.request('POST','/mcp',body=body,encode_chunked=True,headers={'Content-Type':'application/json','Accept':'application/json, text/event-stream'})
             response=connection.getresponse();self.assertEqual(response.status,expected);response.read();connection.close()
         raw=json.loads((self.private/'journey/journey-sdk.args.json').read_text())
         for value,code in [(' '*1048577,'input_limit'),(json.dumps({'formatVersion':1,'events':[json.loads(raw['envelopeJson'])['events'][0]]*1001}),'event_limit')]:
             result=self.sdk('append_events',arguments=dict(raw,envelopeJson=value))
             self.assertEqual(result['structuredContent']['error']['code'],code)
 
-    def test_startup_private_token_owner_and_failed_storage(self):
-        def launch(data, token, extra=()):
-            return self.command('agent_work_ledger','serve','--data-dir',str(data),'--token-file',str(token),'--port',str(self.port),*extra)
-        owner=launch(self.private/'data',self.private/'token')
+    def test_startup_loopback_owner_and_failed_storage(self):
+        def launch(data, extra=()):
+            return self.command('agent_work_ledger','serve','--data-dir',str(data),'--port',str(self.port),*extra)
+        owner=launch(self.private/'data')
         self.assertNotEqual(owner.returncode,0);self.assertIn('already owned',owner.stderr)
-        permissive=self.private/'permissive';permissive.write_text(self.token);permissive.chmod(0o644)
-        self.assertEqual(launch(self.private/'unused',permissive).returncode,2)
-        self.assertEqual(launch(self.private/'unused',self.private/'missing').returncode,2)
-        self.assertEqual(launch(self.private/'unused',self.private/'token',('--host','0.0.0.0')).returncode,2)
+        for flags in [('--host','0.0.0.0'),('--token-file','unused'),('--auth','off')]:
+            self.assertEqual(launch(self.private/'unused',flags).returncode,2)
+        for command in ['init-token','inspector-config']:
+            self.assertEqual(self.command('agent_work_ledger',command).returncode,2)
         for name in ['corrupt','newer']:
             directory=self.private/name;directory.mkdir();database=directory/'ledger.sqlite3'
             if name=='corrupt': database.write_bytes(b'not a database')
             else:
                 with sqlite3.connect(database) as connection: connection.execute('PRAGMA user_version=9')
             original=hashlib.sha256(database.read_bytes()).hexdigest()
-            failure=launch(directory,self.private/'token');self.assertNotEqual(failure.returncode,0)
+            failure=launch(directory);self.assertNotEqual(failure.returncode,0)
             self.assertEqual(hashlib.sha256(database.read_bytes()).hexdigest(),original)
-            self.assertNotIn(self.token,failure.stderr)
         self.assertEqual((self.private/'data').stat().st_mode&0o777,0o700)
         self.assertEqual((self.private/'data/ledger.sqlite3').stat().st_mode&0o777,0o600)
 

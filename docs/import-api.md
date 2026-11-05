@@ -1,6 +1,6 @@
-# Browser file import API
+# Strict browser byte parser API
 
-The dependency-free ES module at `web/import/index.js` implements the file-import portion of [event contract v1](event-contract.md). It has no persistence, network calls, UI or derived graph/state. Reloading the caller clears its in-memory snapshot. The full timeline application is a separate delivery.
+The dependency-free ES module at `web/import/index.js` implements the file-import portion of [event contract v1](event-contract.md). It has no persistence, network calls, UI or derived graph/state. Reloading the caller clears its in-memory snapshot. It remains validation infrastructure for the explicit synthetic Example and shared raw golden fixtures. The ordinary installed application has no file-import workspace/chooser/download; its saved view uses the separately validated durable snapshot adapter. The historical low-level API and limits below remain unchanged.
 
 ## Public exports
 

@@ -1,91 +1,70 @@
-# Local MCP installation and reporting
+# Local installation and explicit MCP reporting
 
-DAM-38 implements this local source installation, official-SDK MCP service and ordinary D durable workspace. Supported author target: CPython **3.12.0**, SQLite **3.42.0**, macOS **26.6.2 arm64**, Chromium **156.0.8078.4**. Other platforms, remote hosting, OAuth/hosted-agent integrations and VPS deployment are unverified/outside DAM-32. Independent integrated QA and user acceptance remain separate from author checks.
+Use CPython3.12 on a local filesystem. The verified client/runtime pins are mcp2.3.0, Starlette1.10.0, Uvicorn0.54.0, httpx2 2.16.0, Inspector2.13.0; Node23.7/npm10.9.2 builds the bundled UI. Locks define the supported closure, not a security audit or other-platform guarantee.
 
-## Install in an isolated environment
+## Install and start
 
-From the source checkout, with CPython 3.12 and Node >=22.19.0 available:
+Choose unused private paths and a dedicated available port; `/tmp` is disposable. From the checkout:
 
 ```sh
 python3.12 -m venv /tmp/awl-venv
 /tmp/awl-venv/bin/python -m pip install -r requirements.lock
-/tmp/awl-venv/bin/python -m pip install --no-deps .
-/tmp/awl-venv/bin/python -m pip check
+/tmp/awl-venv/bin/python -m pip install .
 npm ci --prefix tools/mcp-client --ignore-scripts --no-audit --no-fund
-tools/mcp-client/node_modules/.bin/mcp-inspector --cli --version
 ```
 
-Choose your own unused private paths; `/tmp` is disposable. Product source installation builds a wheel with eight fixed public assets. It is not editable and needs no checkout at runtime. Pinned build tools are setuptools 84.2.1/wheel 0.48.0 in `pyproject.toml`; pip's isolated build may download them during setup. Offline preparation may install those exact tools in the chosen venv then use `--no-build-isolation`. Runtime performs no package/CDN download or paid inference. `requirements.in`, lock and project direct pins agree: mcp 2.3.0, starlette 1.10.0, uvicorn 0.54.0, httpx2 2.16.0. Inspector 2.13.0 is the pinned independent reference client. Locks pin versions, not a security audit or universal compatibility guarantee. [SDK](https://py.sdk.modelcontextprotocol.io/), [Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector) and [transport](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http) are primary references.
-
-Run subsequent commands from a directory **outside the checkout** so Python cannot shadow the installed package with source. Use full paths to the chosen interpreter and Inspector executable.
-
-## Private setup, start, inspect and stop
+The non-editable package bundles seven fixed public assets; it needs no checkout at runtime. Build isolation uses pinned setuptools84.2.1/wheel0.48.0; offline installation may preinstall those tools and use `--no-build-isolation`. No global client configuration or runtime downloads are needed. Run outside checkout to avoid Python source shadowing:
 
 ```sh
 cd /tmp
-/tmp/awl-venv/bin/python -m agent_work_ledger init-token --output /tmp/awl-private/token
-/tmp/awl-venv/bin/python -m agent_work_ledger inspector-config --token-file /tmp/awl-private/token --port 8785 --output /tmp/awl-private/inspector.json
-/tmp/awl-venv/bin/python -m agent_work_ledger serve --data-dir /tmp/awl-private/data --token-file /tmp/awl-private/token --port 8785
+/tmp/awl-venv/bin/python -m agent_work_ledger serve --data-dir /tmp/awl-private/data --port 8785
 ```
 
-Use a dedicated available port. Serve binds only 127.0.0.1, one worker, no reload/proxy-header trust. Token generation uses 32 random bytes; token/config files are 0600 and helpers refuse to overwrite existing files. Keep these files outside public/versioned directories; never put tokens in URLs, shell arguments, committed examples or logs. Service validates token file ownership/mode/shape and the core owns a 0700 data directory / 0600 ledger.sqlite3. No user/client global settings are changed.
+Open `http://127.0.0.1:8785/`. Saved registered project/session names load with **one automatic snapshot read** on open/reload; use Refresh for later reports. No polling or login/token entry. Empty history is honestly empty. Disconnected/invalid reads retain previous graph/source/receipts marked stale. Expand closed **Diagnostics** and explicitly select **Example · synthetic** for separate ephemeral diagnostics. There is no file-import workspace/chooser/sample download/manual Task ID search. Durable history and original `mcp` receipts live in SQLite; Example remains in current-tab memory and clears on reload. No browser storage is used.
 
-Open [ordinary D](http://127.0.0.1:8785/), choose **Durable ledger**, enter the token from your local private token file, and press **Refresh**. Select the explicit registered project and whole-task session. Token remains in page memory only and must be entered again after reload. Refresh performs one authenticated same-origin read; it does not report events or poll. A stale/unavailable/error response retains the last accepted graph/source/receipts. Example and Imported files remain separate browser-memory diagnostics. Durable sources show **Received** and original `mcp` receipts; acceptance does not verify a producer's report or a QA outcome.
+**Trusted local machine:** anyone able to connect to the loopback listener can read/report. No application authentication, authenticated producer identity, OS-user/project isolation or credential/config prerequisite exists. Serve binds exactly127.0.0.1, one worker, no remote bind/reloader/proxy trust or permissive CORS. Every request, including assets, requires exact configured Host; present Origin must equal `http://127.0.0.1:<port>`. Invalid/duplicate headers reaching ASGI return403; malformed HTTP framing is rejected natively before dispatch (duplicate Host:400). These checks do not authenticate local processes. No public HTTP deployment is supported. Future private SSH-tunnel operation is separate validation; SSH administration alone would not protect a publicly listening port.
 
-Stop only this dedicated foreground service with **Ctrl-C**. Restart with the same serve command/data/token paths; registrations/events/first receipts survive. A second owner of the same data directory fails startup. `GET /v1/health` and `GET /v1/snapshot` require Authorization and return no-store versioned envelopes. Registration and append are MCP-only; there is no HTTP write route. Unknown/corrupt/newer storage fails readiness with recovery guidance, never empty-success. Copy backups only after this owner has stopped; preserve a failed original and check a separate restored copy. No migration/reset/repair command exists.
+Stop this foreground process with **Ctrl-C**. Restart with the same data directory and command. No database/schema migration is needed. Preserve existing data and first receipts; old token/config files are unused and must remain untouched. Data directory0700/database0600 and a lifetime exclusive owner lock remain mandatory. A second owner, corruption or unknown storage version fails readiness, never recreates a successful empty ledger. Back up only after stopping this owner (or via SQLite consistent backup); preserve failed originals and validate a separate restored copy. No reset/repair/migration command exists. GET `/v1/health` and `/v1/snapshot` use versioned no-store responses; writes are MCP-only.
 
-## Connect and explicitly report synthetic metadata
+## Connect, report and retry
 
-Prepare a private safe sample journey (12 primary records plus one distinct second-project task, deliberately `qa32:*`, not the built-in Example):
+Both real clients connect by URL only to exact `/mcp`, no Authorization/header configuration. Use a separate Inspector state directory so the helper never changes personal settings:
 
 ```sh
-/tmp/awl-venv/bin/python -m agent_work_ledger.report prepare-example --output-dir /tmp/awl-private/journey
-/tmp/awl-venv/bin/python -m agent_work_ledger.report sdk --token-file /tmp/awl-private/token --port 8785
-/tmp/awl-venv/bin/python -m agent_work_ledger.report inspector --executable /absolute/checkout/tools/mcp-client/node_modules/.bin/mcp-inspector --config /tmp/awl-private/inspector.json --state-dir /tmp/awl-private/inspector-state
+/tmp/awl-venv/bin/python -m agent_work_ledger.report sdk --port 8785
+/tmp/awl-venv/bin/python -m agent_work_ledger.report inspector --executable /absolute/checkout/tools/mcp-client/node_modules/.bin/mcp-inspector --port 8785 --state-dir /tmp/awl-private/inspector-state
 ```
 
-Discovery must show exactly `register_project`, `register_session`, `append_events`. Both real clients use Streamable HTTP exact `/mcp`; tested negotiated protocol 2026-07-28. Helpers isolate `MCP_CLIENT_CONFIG_PATH` and remove `MCP_CATALOG_PATH` for config mode. Do not combine Inspector `--config` and a catalog; do not reuse personal client settings. The helper reads the private token file/config; credentials never appear on its command line.
+Discovery lists exactly `register_project`, `register_session`, `append_events`; verified negotiated protocol2026-07-28. Direct Inspector supports `--cli http://127.0.0.1:8785/mcp --transport http`; a generic connection config, if your client requires one, is `{"mcpServers":{"awl":{"type":"streamable-http","url":"http://127.0.0.1:8785/mcp"}}}` with no headers. The wrapper isolates both MCP_CLIENT_CONFIG_PATH and MCP_CATALOG_PATH and passes the URL directly. SDK uses `Client(streamable_http_client(url,http_client=httpx2.AsyncClient(trust_env=False)))` as an async context; no auth is needed.
 
-Report/retry the entire sample explicitly with one command (SDK and Inspector run as separate processes; credentials remain in private files):
+Explicitly report the safe synthetic journey (two projects/sessions, two separate client processes reporting12 primary events plus one independent task):
 
 ```sh
-/tmp/awl-venv/bin/python -m agent_work_ledger.report journey --args-dir /tmp/awl-private/journey --token-file /tmp/awl-private/token --port 8785 --inspector-executable /absolute/checkout/tools/mcp-client/node_modules/.bin/mcp-inspector --inspector-config /tmp/awl-private/inspector.json --state-dir /tmp/awl-private/inspector-state
+/tmp/awl-venv/bin/python -m agent_work_ledger.report journey --args-dir /tmp/awl-private/journey --port 8785 --inspector-executable /absolute/checkout/tools/mcp-client/node_modules/.bin/mcp-inspector --state-dir /tmp/awl-private/inspector-state
 ```
 
-To inspect each step individually, use the SDK helper for each row below (substitute its tool and args-file), then use the Inspector helper for the indicated second part:
+The helper creates private argument files if that directory is absent; repeats reuse identical files/IDs/content, producing duplicates while preserving first receipts. It never reads chats or reports automatically. Refresh D, choose **Synthetic project A / Synthetic multi-reporter journey**. Failed QA targets v1; explicit revision creates v2; the named v2 recheck passes. Block/resolution retain exact task/run/attempt. A final handoff requests user review, never acceptance. Project B contains one independent report. `expected.json` lists IDs/counts, never fabricated receipts.
+
+For selected individual reporting, first prepare argument files, then use the named tool:
 
 ```sh
-/tmp/awl-venv/bin/python -m agent_work_ledger.report sdk --token-file /tmp/awl-private/token --port 8785 --tool register_project --args-file /tmp/awl-private/journey/project-a.args.json
+/tmp/awl-venv/bin/python -m agent_work_ledger.report prepare-example --output-dir /tmp/awl-private/selected
+/tmp/awl-venv/bin/python -m agent_work_ledger.report sdk --port 8785 --tool register_project --args-file /tmp/awl-private/selected/project-a.args.json
+/tmp/awl-venv/bin/python -m agent_work_ledger.report sdk --port 8785 --tool register_session --args-file /tmp/awl-private/selected/session-a.args.json
+/tmp/awl-venv/bin/python -m agent_work_ledger.report sdk --port 8785 --tool append_events --args-file /tmp/awl-private/selected/journey-sdk.args.json
+/tmp/awl-venv/bin/python -m agent_work_ledger.report inspector --executable /absolute/checkout/tools/mcp-client/node_modules/.bin/mcp-inspector --port 8785 --state-dir /tmp/awl-private/inspector-state --tool append_events --args-file /tmp/awl-private/selected/journey-inspector.args.json
 ```
 
-| Client | Tool | File in the journey directory |
-| --- | --- | --- |
-| SDK | register_project | project-a.args.json |
-| SDK | register_project | project-b.args.json |
-| SDK | register_session | session-a.args.json |
-| SDK | register_session | session-b.args.json |
-| SDK | append_events | journey-sdk.args.json |
-| Inspector | append_events | journey-inspector.args.json |
-| SDK | append_events | second.args.json |
-
-```sh
-/tmp/awl-venv/bin/python -m agent_work_ledger.report inspector --executable /absolute/checkout/tools/mcp-client/node_modules/.bin/mcp-inspector --config /tmp/awl-private/inspector.json --state-dir /tmp/awl-private/inspector-state --tool append_events --args-file /tmp/awl-private/journey/journey-inspector.args.json
-```
-
-These are independent client processes reporting to the **same explicit whole-task session**, with distinct producer actors/runs/attempts. Synthetic QA failed on v1, explicit revision creates v2, and only the named v2 recheck passes. Block/resolution share exact task/run/attempt. Final handoff requests user review; it records no user acceptance. Select project A/session A in D and Refresh to inspect 12 original sources and receipts; project B/session B has one separate record. `expected.json` gives fixture IDs/counts, never fabricated receipts.
-
-Repeat either append command unchanged: zero new records, duplicate IDs, first receipts retained. Reconnect/restart uses the original session and task. A missing response is **unconfirmed**: preserve exact IDs/content and retry; do not create a new session/attempt to retry delivery. `--discard-response` on the SDK test helper deliberately discards an actual committed response for this demonstration; it is not a production service fault switch. Domain failures return MCP `isError:true` plus matching structured/text versioned error over HTTP 200; wrong tools/typed arguments are protocol errors. Authentication/Host/Origin/body-limit failures are separate HTTP transport rejections.
-
-For your own v1 raw file, explicitly register its existing task ID and use:
+For your own selected raw v1 envelope, explicitly register its existing task identity and preserve its JSON text:
 
 ```sh
 /tmp/awl-venv/bin/python -m agent_work_ledger append-args --session-id producer:session --envelope-file /private/selected-events.json --output /tmp/awl-private/selected.args.json
 ```
 
-Then pass that args file to append_events. This helper preserves the raw inner JSON, including duplicate keys for the core to reject. Mixed-task files must be explicitly partitioned by exact task ID; no event project/session fields are invented. Metadata only: no conversations, prompts, transcripts or secrets; no automatic collection, agent orchestration or evidence fetching. A preconfigured bearer protects one owner's ledger, not project-level tenant authorization or authenticated producer labels.
+Pass this args file to append_events. This reporting helper is not an application file importer: it preserves inner duplicate keys/raw bytes for strict core rejection. Mixed-task input must be explicitly partitioned; no project/session inference. Missing response means unconfirmed: retry identical session/event IDs/content, never invent another attempt for transport retry. SDK `--discard-response` deliberately discards an actual committed response for testing this case. Domain errors use matching versioned structured/text results with isError:true over HTTP200; invalid typed tool arguments are protocol errors, Host/Origin/body bounds are HTTP rejections. Receipt confirms acceptance only, not producer truth or QA independence. Metadata only: no prompts/transcripts/secrets, automatic collection or evidence fetching.
 
-## Author checks and limits
+## Checks and limits
 
-[Service harness](../tests/service/README.md) supplies installed-process SDK/Inspector/HTTP security/restart tests and ordinary-D browser controls. [Core tests](../tests/core/README.md) retain the independently checked persistence facade. `node web/tests/durable/check.mjs` exercises strict raw hydration, malicious global metadata/receipt maps, Unicode and bounded capacity. Existing importer 170, graph 27, workspace 6 and UI/workspace Chromium regressions remain required for changed consumers. Package tests launch outside checkout without PYTHONPATH; no source fallback is supported. Test pages are source-only and are not publicly served by the installed product.
+[Installed service/browser commands](../tests/service/README.md) distinguish real wire checks and instrumented negative hydration fixtures. [Core facade tests](../tests/core/README.md) retain persistence/strict parser/crash/capacity checks. The source-only v1 parser and golden fixtures remain validation infrastructure, without UI file import. Old14 file-UI and10 file-workspace browser cases are retired; current installed durable checks cover source/pointer/focus/viewport/long text and the new defaults. Package runtime never falls back to checkout assets/test pages.
 
-Capacity: 1000 projects, 1000 sessions, 10000 events, 8 MiB compact ASCII-escaped producer JSON and 32 MiB snapshot read bound; per-input 1 MiB/1000 occurrences, outer MCP 4 MiB even without Content-Length. Local DELETE journaling only; no network filesystem/multiworker/Windows/hosted-agent compatibility claim. Self-hosted TLS/proxy packaging and VPS access are separate DAM-39. Rich day browsing is DAM-40; Studio integration remains excluded. Source architecture retains the old FigJam quota limitation; author runtime evidence does not update that board or accept DAM-32.
+Limits remain1000projects/1000sessions/10000events/8MiB compact ASCII-escaped producer JSON; 32MiB snapshot hydration, 1MiB/1000occurrences inner envelope and4MiB outer MCP body even chunked. Local DELETE-journal SQLite only, no network-filesystem/multiworker/Windows or hosted-agent guarantee. No PyPI publish, VPS/public hosting, rich day UI, costs or factory integration. [Architecture](architecture.md) preserves the historical FigJam quota fallback. Author checks and exact-version independent review/QA/user acceptance are separate evidence.

@@ -6,14 +6,14 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-from .__main__ import private_write, read_token
+from .__main__ import private_write
 
 async def sdk_call(o):
     from mcp import Client
     from mcp.client.streamable_http import streamable_http_client
     import httpx2
     args = json.loads(Path(o.args_file).read_text()) if o.args_file else {}
-    async with httpx2.AsyncClient(headers={'Authorization': 'Bearer ' + read_token(o.token_file)}, trust_env=False) as http:
+    async with httpx2.AsyncClient(trust_env=False) as http:
         async with Client(streamable_http_client(f'http://127.0.0.1:{o.port}/mcp', http_client=http)) as client:
             if o.tool:
                 r = await client.call_tool(o.tool, args)
@@ -49,14 +49,14 @@ def prepare(directory):
 def main():
     p = argparse.ArgumentParser(description='Explicit selected metadata; no automatic reporting.')
     sub = p.add_subparsers(dest='command', required=True)
-    sdk = sub.add_parser('sdk'); sdk.add_argument('--token-file', required=True); sdk.add_argument('--port', type=int, default=8785)
+    sdk = sub.add_parser('sdk'); sdk.add_argument('--port', type=int, default=8785)
     sdk.add_argument('--tool'); sdk.add_argument('--args-file'); sdk.add_argument('--discard-response', action='store_true')
-    inspector = sub.add_parser('inspector'); inspector.add_argument('--executable', required=True); inspector.add_argument('--config', required=True)
+    inspector = sub.add_parser('inspector'); inspector.add_argument('--executable', required=True); inspector.add_argument('--port', type=int, default=8785)
     inspector.add_argument('--state-dir', required=True); inspector.add_argument('--tool'); inspector.add_argument('--args-file')
     example = sub.add_parser('prepare-example'); example.add_argument('--output-dir', required=True)
     journey = sub.add_parser('journey', help='Explicitly report/retry the safe synthetic fixture through both real clients.')
-    journey.add_argument('--args-dir', required=True); journey.add_argument('--token-file', required=True); journey.add_argument('--port', type=int, default=8785)
-    journey.add_argument('--inspector-executable', required=True); journey.add_argument('--inspector-config', required=True); journey.add_argument('--state-dir', required=True)
+    journey.add_argument('--args-dir', required=True); journey.add_argument('--port', type=int, default=8785)
+    journey.add_argument('--inspector-executable', required=True); journey.add_argument('--state-dir', required=True)
     o = p.parse_args()
     if o.command == 'journey':
         if not 1024 <= o.port <= 65535: p.error('Use a valid loopback port.')
@@ -64,8 +64,8 @@ def main():
         for tool, name in [('register_project','project-a'),('register_project','project-b'),('register_session','session-a'),('register_session','session-b'),('append_events','journey-sdk'),('append_events','journey-inspector'),('append_events','second')]:
             command = [sys.executable, '-m', 'agent_work_ledger.report']
             if name == 'journey-inspector':
-                command += ['inspector','--executable',o.inspector_executable,'--config',o.inspector_config,'--state-dir',o.state_dir]
-            else: command += ['sdk','--token-file',o.token_file,'--port',str(o.port)]
+                command += ['inspector','--executable',o.inspector_executable,'--port',str(o.port),'--state-dir',o.state_dir]
+            else: command += ['sdk','--port',str(o.port)]
             command += ['--tool',tool,'--args-file',str(Path(o.args_dir) / (name + '.args.json'))]
             result = subprocess.run(command, capture_output=True, text=True)
             if result.returncode: raise SystemExit('Synthetic report unconfirmed; check local setup and retry identical inputs.')
@@ -79,8 +79,8 @@ def main():
         asyncio.run(sdk_call(o))
     else:
         state = Path(o.state_dir).resolve(); state.mkdir(mode=0o700, parents=True, exist_ok=True); os.chmod(state, 0o700)
-        environment = dict(os.environ); environment.pop('MCP_CATALOG_PATH', None); environment['MCP_CLIENT_CONFIG_PATH'] = str(state / 'client.json')
-        args = [o.executable, '--cli', '--config', o.config, '--server', 'awl', '--protocol-era', 'modern', '--method', 'tools/call' if o.tool else 'tools/list', '--format', 'json']
+        environment = dict(os.environ); environment['MCP_CATALOG_PATH'] = str(state / 'catalog.json'); environment['MCP_CLIENT_CONFIG_PATH'] = str(state / 'client.json')
+        args = [o.executable, '--cli', f'http://127.0.0.1:{o.port}/mcp', '--transport', 'http', '--protocol-era', 'modern', '--method', 'tools/call' if o.tool else 'tools/list', '--format', 'json']
         if o.tool: args += ['--tool-name', o.tool, '--tool-args-json', Path(o.args_file).read_text()]
         raise SystemExit(subprocess.run(args, env=environment).returncode)
 

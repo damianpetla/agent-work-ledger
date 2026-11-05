@@ -96,6 +96,28 @@ class InstalledService(unittest.TestCase):
     def tearDownClass(cls):
         cls.stop();cls.temp.cleanup()
 
+    def test_direct_demo_document_and_no_database_mutation(self):
+        before=self.get('/v1/snapshot')[1]
+        database=self.private/'data/ledger.sqlite3'
+        original=hashlib.sha256(database.read_bytes()).hexdigest()
+        root=self.get('/');demo=self.get('/demo')
+        self.assertEqual(demo[0],200);self.assertEqual(demo[1],root[1])
+        self.assertIn('text/html',demo[2]['content-type'])
+        for path in ['/demo/','/demo/unknown','/not-a-route']:
+            self.assertEqual(self.get(path)[0],404)
+        for headers in [{'Host':'evil.invalid'},{'Origin':'null'},{'Origin':'http://evil.invalid'}]:
+            self.assertEqual(self.get('/demo',headers)[0],403)
+        self.assertEqual(self.get('/demo',{'Origin':self.base})[0],200)
+        for header,expected in [('Host',400),('Origin',403)]:
+            host=f'Host: 127.0.0.1:{self.port}\r\n'
+            extra=host if header=='Host' else f'Origin: {self.base}\r\nOrigin: {self.base}\r\n'
+            with socket.create_connection(('127.0.0.1',self.port),timeout=5) as connection:
+                connection.sendall(f'GET /demo HTTP/1.1\r\n{host}{extra}Connection: close\r\n\r\n'.encode())
+                wire=connection.recv(4096)
+            self.assertEqual(int(wire.split(b' ')[1]),expected)
+        self.assertEqual(self.get('/v1/snapshot')[1],before)
+        self.assertEqual(hashlib.sha256(database.read_bytes()).hexdigest(),original)
+
     def test_discovery_clients_and_journey(self):
         self.assertEqual(self.discovery['protocol'],'2026-07-28')
         self.assertEqual({t['name'] for t in self.discovery['tools']},{'register_project','register_session','append_events'})

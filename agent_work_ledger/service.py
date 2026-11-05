@@ -103,6 +103,8 @@ def create_app(data_dir, port):
 
     async def asset(request):
         name = request.path_params.get('path', '') or 'index.html'
+        if request.url.path == '/demo':
+            name = 'index.html'
         if name not in allowed:
             return Response('Not found', status_code=404)
         try:

@@ -1,0 +1,12 @@
+{
+  "name": "awl-mcp-client-checks",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Pinned independent real MCP Inspector CLI for local checks",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/inspector": "2.13.0"
+  }
+}

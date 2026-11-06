@@ -1,52 +1,22 @@
 # Agent Work Ledger
 
-Inspect source-linked task relations, attempts and checks locally, without an account or AI service. The ordinary application opens D with an explicitly synthetic example accepted through the real v1 byte importer. Independent review, integrated QA and user evaluation remain separate acceptance gates. There is no live agent connection, backend or durable history.
+Inspect source-linked task relations, attempts and checks locally. Saved registered projects and whole-task sessions open by default from the local SQLite ledger: one automatic snapshot read on open/reload, then explicit Refresh for later reports. No account, application login or AI service is required.
 
-## Run locally
+Follow [local install and reporting](docs/local-service.md): install in a private virtual environment, then run `python -m agent_work_ledger serve --data-dir /private/awl-data --port 8785`. Open `http://127.0.0.1:8785/`. Register a project/session and report selected metadata through the three MCP tools at `/mcp`, using the official SDK or pinned Inspector with URL-only connection. The guide includes a safe synthetic multi-reporter journey, identical retries, stop/restart and recovery.
 
-Requires CPython **3.12** and desktop Chromium. Serve only public assets:
+The service trusts processes/users able to connect to this machine’s loopback listener. It does not authenticate producers or isolate OS users/projects. Exact Host/present-Origin checks, no CORS and binding only127.0.0.1 constrain this local capability; they do not supply identity. No remote/public listener or deployment is supported. Future private SSH-tunnel operation requires separate validation; SSH administration alone would not protect a public HTTP port.
 
-```sh
-python3.12 -m http.server 8774 --bind 127.0.0.1 --directory web
-```
+Select saved project and whole-task session **names**, then inspect graph cards by pointer or Enter. Close/Return preserves the selected context and viewport. All records, entities/relations and diagnostics expose exact supporting producer JSON and separate original ledger receipts, including cross-task contradiction sources. Failed QA targets its explicit attempt; a later revision/recheck never inherits acceptance. Missing/conflicting evidence stays unknown or ambiguous. Producer reports and receipt acceptance do not certify truth, review independence or completion.
 
-Open [Agent Work Ledger](http://127.0.0.1:8774/). Stop the dedicated server with **Ctrl-C**. Choose a free port if 8774 is already in use. Do not serve the repository root or open the app as `file://`. This loopback server is for local inspection, not production hosting. Viewing committed assets needs no npm installation or build. Author environment: Python 3.12.0, Chromium 156.0.8078.4, macOS 26.6.2 arm64; other targets are unverified.
+Open `/` directly for saved work. Open `/demo` directly for the existing ten synthetic workflow events, loaded automatically through the strict byte parser into current-tab memory. Reloading `/demo` loads those same producer events with new current-tab receipts. Demo performs no ledger snapshot/health/MCP requests or durable writes; it never substitutes for saved history. The app has no top product header, mode chooser, Diagnostics menu, cross-mode link or routine success banner. Project/session names and Refresh remain in the saved view. Graph evidence diagnostics and exact sources remain inspectable in both views. Saved events and original `mcp` receipts persist in SQLite. No file importer, sample download, Task ID search, credential prompt or browser persistence. Empty saved history stays empty; failed reads retain prior accepted graph/source marked stale. Demo fetch/parse failure explicitly asks for reload, without a durable fallback.
 
-## Try the working graph
+Only selected structured diagnostic metadata belongs here: no prompts, transcripts or secrets. Reporting is opt-in and never collects conversations automatically. Raw v1 MCP envelopes retain [strict limits and identity](docs/event-contract.md), [parser API/goldens](docs/import-api.md), [source-linked graph contract](docs/graph-api.md), and [durable service contract](docs/ledger-api.md). The low-level byte parser remains validation infrastructure for MCP/Example, not a file-import UI.
 
-1. **Example** starts with [ten invented workflow records](web/examples/synthetic-workflow.json), fetched locally as bytes and validated by the ordinary importer. Find separate attempts `example:v1` and `example:v2`, failed QA targeting only v1, the explicit v1→v2 revision, and passed QA targeting only v2. Handoffs end at named actors; QA is not connected to a later revision by guesswork. The final report requests user review, without asserting acceptance.
-2. Click card text or padding. Check cards open their accepted producer JSON and separate **current-tab ledger receipt**. An actor/run/attempt supported by several events first shows projected facts and **all named supporting records**; select the source you want. Projections are not exact producer JSON. Open, Close and Return keep graph x/y/zoom unchanged. Return restores the invoking control's focus. Keyboard users can Tab to native buttons and press Enter.
-3. Use explicit pan, Zoom in/out and Fit to explore. Arrow keys pan a focused canvas. The graph is read-only. A new task/workspace receives one measured initial orientation; long content or other topologies may require panning. Cards wrap and grow rather than shrinking their text. No universal graph-routing or mobile/accessibility certification is claimed.
-4. **Other evidence** exposes runtime and other reports; **All records** is the complete occurrence-ordered timeline; **Entities and relations** includes context, internal and disconnected entities and every literal relation. Diagnostics expose unresolved, invalid, ambiguous and cyclic references with their exact sources. Advice is not assignment. A check applies only to its named attempt; a later attempt inherits no pass.
-5. Choose **Imported files** and open [the independent six-record example](web/examples/synthetic-timeline.json) through the native file chooser. It produces a different graph and two actual task IDs, including `demo:other-task`. This workspace starts empty and later file imports accumulate there. Repeating the same file gives 0 new / 6 duplicate events and preserves first receipts. Malformed, conflicting and unreadable files preserve the prior imported graph/source. The built-in Example stays separate and retains its current-tab receipts when reopened.
-6. Inspect runtime reports: configured settings are separate from reported runtime verification, and unknown remains unknown. Receipt confirms local acceptance only, never producer truth, independence or completion. Reload resets imported data and recreates the example with new current-tab receipts; keep original files for reconstruction. Startup fetch/validation failure shows an actionable error and leaves manual import available, rather than displaying a fallback graph.
-
-V1 has task IDs but no registered project, session, day or work-title fields. The task directory uses actual accepted IDs. Familiar names inside synthetic records are labels only. There is no inferred owner/waiting summary, cost calculation, real producer, collector, project history or factory integration.
-
-## Input and privacy
-
-Files are UTF-8 v1 JSON envelopes limited to **1 MiB (1,048,576 encoded bytes)** and **1,000 event occurrences per import**. The unchanged [event contract](docs/event-contract.md) and [import API](docs/import-api.md) define identity, strict decoding, atomic validation, duplicate/conflict handling, ordering and receipts. Event content is a producer declaration. The [graph API](docs/graph-api.md) defines explicit evidence relations and diagnostics.
-
-Data stays in browser memory. No localStorage, IndexedDB, outgoing remote runtime requests or AI analysis is used. Only structured diagnostic metadata belongs here: do not import transcripts, prompts, secrets or private conversation content.
-
-## Development and checks
-
-The pure importer/projector remain dependency-free. The selected D UI uses locally bundled MIT React Flow, Dagre, React and React DOM, with locked dependencies and [third-party notices](web/graph-ui/THIRD-PARTY-LICENSES.txt). No Pro examples or CDN assets are used. Rebuild with Node 23.7.0 / npm 10.9.2 (observed):
+The pure importer/projector and durable core are dependency-free. The UI bundles locked MIT React Flow, Dagre, React and React DOM locally; no CDN assets or AI analysis. See [notices](web/graph-ui/THIRD-PARTY-LICENSES.txt). Build with Node23.7/npm10.9.2:
 
 ```sh
 npm ci --prefix graph-ui --ignore-scripts
 npm run build --prefix graph-ui
-node web/tests/graph/check.mjs
-node web/tests/workspace/check.mjs
 ```
 
-Open [browser importer checks](http://127.0.0.1:8774/tests/import/) using the same server. Optional Node/CDP runners use an explicitly selected isolated Chromium executable, never the user's private browser:
-
-```sh
-AWL_TEST_ORIGIN=http://127.0.0.1:8774 AWL_TEST_CHROMIUM=/path/to/isolated/chromium AWL_TEST_OUTPUT=/tmp/awl-ui node web/tests/ui/check.mjs
-AWL_TEST_ORIGIN=http://127.0.0.1:8774 AWL_TEST_CHROMIUM=/path/to/isolated/chromium AWL_TEST_OUTPUT=/tmp/awl-graph node web/tests/workspace/browser.mjs
-```
-
-[Working-D author evidence](web/tests/workspace/evidence.md) records versions, actual checks, first failures, bounds, screenshots, build hashes and limitations. These author results do not replace independent review/QA or the user trial. [Product brief](docs/product-brief.md) and [technical plan](docs/technical-plan.md) describe current scope and deferred results.
-
-Licensed under [MIT](LICENSE).
+[Installed process/browser checks](tests/service/README.md) document current tests and retired file-UI cases. [Core checks](tests/core/README.md) cover strict bytes, immutable registrations, SQLite ownership/atomic receipts/recovery, crash and capacity limits. [Architecture](docs/architecture.md) distinguishes implemented source and evidence from independent acceptance. DAM-31 waiting summaries, DAM-39 remote validation, DAM-40 day browsing, costs and factory-specific integration are outside this local result. MIT licensed; no PyPI publication is implied.

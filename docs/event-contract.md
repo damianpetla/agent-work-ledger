@@ -1,8 +1,8 @@
-# Event contract v1 — planned
+# Event contract v1
 
 **Tech Lead · gpt-6.1-sol · medium (configured)**
 
-This is a specification, not an implemented schema. [Product terms](product-brief.md#terminology) remain canonical. No provider, role vocabulary, tracker or orchestrator is required.
+The browser file importer implements these producer-event rules. Durable receipt implementation follows the separately versioned [ledger service contract](ledger-api.md); this document does not establish that service exists. [Product terms](product-brief.md#terminology) remain canonical. No provider, role vocabulary, tracker or orchestrator is required.
 
 ## Envelope and identity
 
@@ -48,7 +48,7 @@ Validate the complete envelope and every event before mutation. Duplicate keys a
 
 Same eventId plus structurally equal parsed event content is idempotent, even if JSON object keys or whitespace differ. Arrays retain order; all strings compare exactly; no trimming, case conversion or null/absent normalization. Compare all producer fields, excluding locally generated receipt metadata. Same ID/different content is `event_id_conflict`; report its index/ID, never overwrite. Check duplicates within the incoming batch and against stored events. Equality must work identically in browser and receiver, backed by shared golden fixtures rather than a speculative cross-language hash protocol.
 
-On success, each newly accepted event gets local metadata `{receivedAt, receiptId, channel}`. `receivedAt` uses the same UTC format but is local acceptance time; `channel` is `file` or `http`. First successful receipt metadata survives retries. Show imported time for file input and received time for HTTP. Duplicate attempts return duplicate counts/IDs without replacing first receipt time. Rejected batches create no event receipts. Receipt proves acceptance by this ledger only.
+On success, each newly accepted event gets local metadata `{receivedAt, receiptId, channel}`. `receivedAt` uses the same UTC format but is local acceptance time; `channel` is `file` for browser imports or `mcp` for the planned durable service. Receipt metadata is separate from producer formatVersion 1; [service contract v1](ledger-api.md) defines durable metadata. First successful receipt metadata survives retries. Show imported time for file input and received time for durable MCP. Duplicate attempts return duplicate counts/IDs without replacing first receipt time. Rejected batches create no event receipts. Receipt proves acceptance by this ledger only.
 
 Timeline sort: known occurredAt ascending, then eventId ASCII ascending; unknown occurredAt entries follow known ones, sorted by eventId. This order is stable across import permutations. Receipt time is shown separately and is never substituted for occurredAt. Sort order is a presentation convention, not a causal or clock-correctness guarantee.
 
@@ -60,14 +60,10 @@ For each run/attempt, open blocks are block events minus valid same-task resolut
 
 Review/QA nodes attach only to their target attempts; a revision never inherits a passed outcome. Do not aggregate self-reported passes into a task certification. Unknown reference, conflicting binding and missing runtime evidence remain visible. All summaries state “based on received records”; no heartbeat, live health, stalled-time or actual-completion inference.
 
-## Durable receipt interface (third result)
+## Durable project/session receipt interface
 
-Planned loopback interface: `POST /v1/events` accepts the same envelope, `Content-Type: application/json`, with an explicitly configured local bearer token. Return JSON `{receiptId, acceptedEventIds, duplicateEventIds}` after transaction commit; 201 when new events are accepted, 200 for entirely duplicate batches. The batch receiptId is a local opaque receipt; retries may get a new batch receiptId while event receipts remain unchanged.
+[DAM-32 service contract v1](ledger-api.md) replaces the former unimplemented plain HTTP producer plan. Explicit project/session registration accompanies unchanged formatVersion 1 events. Session IDs, task IDs and MCP protocol sessions are distinct. The trusted loopback-only local MCP service calls one shared durable core; the ordinary D UI reads its committed events and original receipts through the same-origin API without application authentication. A successful receipt proves ledger acceptance only.
 
-Errors return `{error: {code, message, eventIndex, field}}`, index/field nullable: 400 invalid JSON/schema or unsupported version, 401 missing/wrong token, 403 disallowed Host/Origin, 409 event ID conflict, 413 size/count limit, 415 wrong media type, 503 busy/storage failure. No partial success. Network failure or missing response means unconfirmed: retry the same IDs/content, never invent receipt or a new work attempt. Conflicting content must use a new event ID to report a correction, leaving history inspectable.
+The core validates raw envelope bytes/text, not already-parsed events. The strict decoding, all-or-nothing validation, structural equality, limits, ledger-wide IDs, duplicate occurrence counts and stable event ordering above remain binding. Unsupported producer versions are rejected, never silently migrated. The strict raw parser remains validation infrastructure for the ephemeral synthetic Example; no file-import UI/workspace remains and no project/session is invented for legacy input.
 
-The receiver binds only 127.0.0.1; one process owns one SQLite file. Serialize transactions; reject unsupported competing process ownership cleanly. Use explicit transactions and durable commit before acknowledgement. Abort/failure preserves prior events; a crash after commit before response is recoverable by idempotent retry. Restart loads committed events with original receipts. Do not reset corrupt/unknown-version storage: fail with recovery guidance and preserve it. Exact SQLite/application versions must be recorded during implementation validation; no backup, distributed delivery, remote hosting or historical database migration guarantee is implied.
-
-Read path: `GET /v1/tasks/{taskId}/events` returns `{formatVersion: 1, events: [...], receipts: [...]}` under the same token. Each receipt is `{eventId, receivedAt, receiptId, channel}` with one entry per returned event; unknown task returns empty arrays. UI explicitly loads/refreshes them. Local file imports stay a separate in-memory workspace and never silently write to the durable ledger. Responses use `Cache-Control: no-store`; no CORS allowance. Validate Host against the bound 127.0.0.1 and chosen port, reject any present Origin other than that exact local origin, and require the token for reads/writes; non-browser producers may omit Origin. The UI obtains the token by explicit local user entry and keeps it in memory only. No token in URLs, committed examples or logs. A token is local access protection, not verified producer identity. Serve only fixed public UI assets in this mode, never an arbitrary filesystem directory.
-
-Only structured task metadata belongs here: no transcripts, prompts, secrets, home paths or real private recordings. Synthetic examples must label source.synthetic true. Do not fetch evidence references automatically. Logs contain bounded error codes/counts, not event content or authorization values.
+No standalone HTTP producer or direct POST /v1/events endpoint is required. Existing durable history and first receipts must be preserved. Storage schema/recovery, exact tools/read routes, safe snapshot hydration, error mapping and local request controls have their sole durable definition in [ledger-api.md](ledger-api.md). Public install/runtime support and actual probe limitations are in [local-service.md](local-service.md).

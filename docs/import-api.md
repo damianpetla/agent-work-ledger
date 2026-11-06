@@ -1,6 +1,6 @@
-# Browser file import API
+# Strict browser byte parser API
 
-The dependency-free ES module at `web/import/index.js` implements the file-import portion of [event contract v1](event-contract.md). It has no persistence, network calls, UI or derived graph/state. Reloading the caller clears its in-memory snapshot. The full timeline application is a separate delivery.
+The dependency-free ES module at `web/import/index.js` implements the file-import portion of [event contract v1](event-contract.md). It has no persistence, network calls, UI or derived graph/state. Reloading the caller clears its in-memory snapshot. It remains validation infrastructure for the explicit synthetic Example and shared raw golden fixtures. The ordinary installed application has no file-import workspace/chooser/download; its saved view uses the separately validated durable snapshot adapter. The historical low-level API and limits below remain unchanged.
 
 ## Public exports
 
@@ -88,3 +88,7 @@ python3.12 -m http.server 8773 --bind 127.0.0.1 --directory web
 ```
 
 Open `http://127.0.0.1:8773/tests/import/` in an isolated desktop Chromium. The page runs ES-module checks and prints named results plus `TOTAL / PASS / FAIL / SKIP`. It is a test harness, not the timeline product UI. Stop the dedicated server with Ctrl-C. Serve only `web`, never the repository root. No installation, package manager, framework, bundler or CDN is required. See [author evidence](../web/tests/import/evidence.md) for exact observed versions, commands and limitations. Independent source review and integrated application QA/user evaluation remain separate gates.
+
+## Durable adapter (DAM-38)
+
+The existing snapshot API remains trusted only for its own successful outputs. The new `acceptDurableSnapshot(rawBytes)` export is specified in [service contract v1](ledger-api.md#storage-and-safe-hydration); it must validate raw server responses and registrations/events/first receipt correspondence before publishing a compatible frozen snapshot. It must not cast arbitrary objects, call file import to generate replacement receipts or alter existing file semantics. The implementation is in `web/import/durable.js`; `node web/tests/durable/check.mjs` covers raw/global-map/receipt rejection and shared Unicode parity. Installed ordinary-D runtime checks are documented in `tests/service/README.md`.

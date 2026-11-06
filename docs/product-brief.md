@@ -6,18 +6,20 @@ Agent Work Ledger helps a person supervising agent work understand who delegated
 
 The first user is an individual running a small agent workflow locally. The product must remain useful with arbitrary actors, role labels, task systems and agent providers. It is an independent public MIT project. Future self-hosting is a direction, not a prerequisite for local evaluation.
 
-## Current boundary and first evaluation
+## Current boundary and next evaluation
 
-The repository includes a local file timeline and source inspector. The authorized amended first result (DAM-30) adds the selected D graph over actual accepted v1 records, a bundled explicitly synthetic example loaded through the ordinary byte importer, task selection and secondary diagnostic file import. DAM-35 provides the [pure evidence projection](graph-api.md); DAM-36 provides its ordinary application consumer. Author checks do not establish independent acceptance. The working graph UI is implemented for independent review, with [author evidence](../web/tests/workspace/evidence.md). Integrated QA and actual user evaluation remain pending.
+DAM-30 ordinary D is accepted on main `9656cc61e51d804b6e63f9518deaf1ce06171489`. It presents strict accepted v1 events from a bundled synthetic example and independent files, source-linked relations/attempts, timeline and separate current-tab receipts. File workspaces remain in browser memory; reload resets them. Historical author evidence remains in the repository, and acceptance is the delivery owner's decision.
 
-The first evaluation traces delegation → failed QA → revised attempt → explicit recheck, then inspects original accepted events and separate current-tab receipts. Example and imported-file workspaces stay separate in browser memory; reload resets them. No external account, AI call or private history is required. Invalid startup input shows an error, never a fabricated success graph. Every imported record remains source-accessible, including branches, cycles and unresolved references. D is not a live collector, registered project/session/day directory or completion certification.
+The next authorized implementation outcome, DAM-32, adds local installation, explicit project/whole-task session registration, real MCP reporting, durable receipts/history and ordinary-D inspection after reload/service restart. DAM-37/38 deliver the shared core and integration. The owner-directed correction makes saved projects/sessions the default: one automatic snapshot read on open/reload, manual Refresh thereafter, no polling. Exact `/demo` directly loads the existing ten synthetic workflow events on open/reload into current-tab memory, without durable API traffic/writes or fallback. `/` directly shows saved history. No top header, mode chooser/Diagnostics menu, cross-mode link or routine success banner remains; saved project/session names, Refresh, actionable errors and graph source diagnostics remain. The UI no longer imports files, downloads samples or accepts manual Task ID search. No application login/token/account/browser persistence is used; the trusted local listener binds only127.0.0.1 and validates exact Host/present Origin on every route. This trusts local processes/users without authenticating producer labels or isolating projects. Future VPS use requires a separately validated private SSH tunnel, not a public HTTP port. The [service contract](ledger-api.md) and [local setup/support](local-service.md) define the bounded path and truthful evidence boundary.
 
 ## Terminology
 
 | Term | Meaning |
 | --- | --- |
 | Actor | An identified person, agent or tool; a role is a configurable label, not an access grant. |
-| Task | A stable unit of intended work, optionally associated with an external ticket. |
+| Project | Explicit registered organizational context, identified independently of its display name. |
+| Session | One explicitly registered whole-task journey, covering multiple agents, runs and attempts; distinct from a protocol connection or browser tab. |
+| Task | A stable unit of intended work, optionally associated with an external ticket; explicitly bound to exactly one registered session in the first durable contract. |
 | Run | One execution assigned to an actor for a task. |
 | Attempt | A distinct try or revision within a run; retries of event delivery do not create new work attempts. |
 | Event | An identified record of an occurrence or assertion, correlated to the relevant task, run, attempt and related event when known. |
@@ -25,7 +27,7 @@ The first evaluation traces delegation → failed QA → revised attempt → exp
 | Consultation | A request for information or advice; it does not itself transfer responsibility. |
 | Reported state | A deterministic interpretation of received events, with uncertainty visible; it is not observation of the live execution. |
 
-The technical contract will define exact identifiers, cardinality and validation. Missing identifiers or evidence must not be invented to make a graph look complete.
+The technical contract defines exact identifiers, cardinality and validation. Missing identifiers or evidence must not be invented to make a graph look complete.
 
 ## Durable requirements
 
@@ -39,16 +41,12 @@ Collect structured diagnostic metadata needed for the task rather than transcrip
 
 ## Product sequence
 
-The following describes product boundaries, not a second backlog or an implementation commitment. Delivery issues own acceptance, dependencies and current progress.
+Delivery issues own current status/acceptance, not this document. DAM-30 provides accepted local D. DAM-32 is the next small local MCP/persistent-project-session vertical, with DAM-37 shared core and DAM-38 client/ordinary-view/install integration. Waiting/next-actor summaries remain independent DAM-31 and do not block MCP. DAM-39 subsequently validates self-hosted installation/security in isolation without deploying the user's VPS; DAM-40 adds richer project/day browsing using the same history store. No second history backend or preliminary HTTP-producer user trial is needed.
 
-1. **Inspect a local task in D (DAM-30).** Load a bundled synthetic example through the real importer, trace source-linked delegation/consultation, attempts and explicit checks, inspect timeline/source/receipts and import independent diagnostic files. Excludes derived owner/waiting summaries, live collection and MCP. DAM-35 projection and DAM-36 presentation are sequential technical outputs under this first result.
-2. **Summarize received-record waiting (residual DAM-31).** After actual DAM-30 acceptance, compute scoped open blocks, explicit next-actor candidates and ambiguity from the delivered relation projection. No live-state inference, real producer, orchestration or automatic anomaly diagnosis.
-3. **Receive one local producer's reports.** Exercise a real documented client boundary with safe synthetic content, receipt/error feedback, retry identity and persistence across restart, then inspect the same events. Fixtures alone cannot establish this result.
-
-Product recommendation: evaluate local input/view before adding MCP. Tech Lead must explicitly choose the transport, assess the size of the third result and decide whether a generic MCP adapter and reusable reporting skill fit it or need a separate later release. No technical implementation is selected here. Factory-specific integration should occur only after the independent tool is built, tested and usable through its public instructions.
+A new evaluator follows public local instructions, connects the pinned real MCP client, registers one project and whole-task session, reports a safe synthetic journey with multiple actors/runs and inspects those exact records/first receipts in ordinary D after restart/retry. Independent core QA precedes consumer integration; integrated QA and actual user evaluation remain separate DAM-32 gates. Successful transport alone proves neither producer truth nor agent independence. Studio-specific reporting/integration follows independent MCP acceptance using the public product guide, and remains outside this outcome.
 
 ## Exclusions and later questions
 
-The initial delivery is not an orchestration engine, billing system, transcript collector, AI evaluator or dashboard for an entire software factory. It does not enforce roles or independence, schedule work, collect agent data automatically, deploy to a VPS or integrate with a particular factory. Deterministic anomaly indicators can follow evidence from the first evaluation; rules and thresholds are not promised yet.
+The product is not an orchestration engine, billing system, transcript collector, AI evaluator or dashboard for an entire software factory. It does not enforce roles or independence, schedule work, collect agent data automatically, deploy to a VPS or integrate with a particular factory. Deterministic anomaly indicators can follow evidence from the first evaluation; rules and thresholds are not promised yet.
 
-Before implementation, technical planning must settle the minimal local runtime and supported platform, event schema/versioning and correlation rules, import/receipt semantics, storage/recovery and ordering rules, source-verification representation, and the smallest real-producer path. Public setup instructions and proportionate independent verification must accompany each usable result. Planned QA and user trials are requirements, not test results.
+The service contract and support document settle the first durable runtime, registration/cardinality, unchanged event schema, receipt/storage/recovery and supported real-client path. Public setup instructions and proportionate independent verification must accompany each usable result. Planned QA and user trials are requirements, not test results.
